@@ -2,6 +2,8 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.2'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'checkstyle'
+    id 'pmd'
 }
 
 group = 'org.kammerer'
@@ -9,7 +11,7 @@ version = '1.0-SNAPSHOT'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(22)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -19,8 +21,21 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.projectlombok:lombok:1.18.34'
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+checkstyle {
+    toolVersion = '9.3'
+    configFile = file('config/checkstyle/checkstyle.xml')
+}
+
+pmd {
+    toolVersion = '7.5.0'
+    ruleSetFiles('config/pmd/ruleset.xml')
 }
 
 test {
