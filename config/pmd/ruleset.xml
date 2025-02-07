@@ -18,7 +18,8 @@
     <rule ref="category/java/bestpractices.xml">
         <exclude name="GuardLogStatement"/>
         <exclude name="UnusedPrivateMethod"/>
-<!--        <exclude name="UnitTestAssertionsShouldIncludeMessage"/>-->
+        <exclude name="JUnitTestContainsTooManyAsserts"/>
+        <exclude name="JUnitAssertionsShouldIncludeMessage"/>
     </rule>
     <rule ref="category/java/codestyle.xml">
         <exclude name="AtLeastOneConstructor"/>
@@ -27,6 +28,8 @@
         <exclude name="LongVariable"/>
         <exclude name="ShortVariable"/>
         <exclude name="CommentDefaultAccessModifier"/>
+        <exclude name="MethodNamingConventions"/>
+        <exclude name="LinguisticNaming"/>
     </rule>
     <rule ref="category/java/design.xml">
         <exclude name="LawOfDemeter"/>
