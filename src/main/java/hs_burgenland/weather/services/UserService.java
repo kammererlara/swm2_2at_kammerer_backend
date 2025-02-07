@@ -19,7 +19,7 @@ public class UserService {
         user.setFirstname(firstname);
         user.setLastname(lastname);
 
-        if (userRepository.getUserByName(firstname, lastname).isPresent()) {
+        if (userRepository.getUserByFirstnameAndLastname(firstname, lastname).isPresent()) {
             throw new EntityAlreadyExistingException(String.format("User %s %s does already exist on this bank.", firstname, lastname));
         }
 

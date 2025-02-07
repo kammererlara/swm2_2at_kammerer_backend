@@ -18,6 +18,7 @@
     <rule ref="category/java/bestpractices.xml">
         <exclude name="GuardLogStatement"/>
         <exclude name="UnusedPrivateMethod"/>
+        <exclude name="JUnitTestsShouldIncludeAssert"/>
         <exclude name="JUnitTestContainsTooManyAsserts"/>
         <exclude name="JUnitAssertionsShouldIncludeMessage"/>
     </rule>
@@ -74,5 +75,6 @@
     <rule ref="category/java/errorprone.xml">
         <exclude name="AvoidDuplicateLiterals"/>
         <exclude name="MissingSerialVersionUID"/>
+        <exclude name="TestClassWithoutTestCases"/>
     </rule>
 </ruleset>

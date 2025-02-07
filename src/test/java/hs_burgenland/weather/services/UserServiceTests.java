@@ -40,7 +40,7 @@ class UserServiceTests {
         user.setFirstname(firstname);
         user.setLastname(lastname);
 
-        when(userRepository.getUserByName(firstname, lastname)).thenReturn(Optional.empty());
+        when(userRepository.getUserByFirstnameAndLastname(firstname, lastname)).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         final User createdUser = userService.createUser(firstname, lastname);
@@ -57,8 +57,7 @@ class UserServiceTests {
         final User existingUser = new User();
         existingUser.setFirstname(firstname);
         existingUser.setLastname(lastname);
-
-        when(userRepository.getUserByName(firstname, lastname)).thenReturn(Optional.of(existingUser));
+        when(userRepository.getUserByFirstnameAndLastname(firstname, lastname)).thenReturn(Optional.of(existingUser));
 
         assertThrows(EntityAlreadyExistingException.class, () -> userService.createUser(firstname, lastname));
         verify(userRepository, never()).save(any(User.class));
@@ -72,7 +71,7 @@ class UserServiceTests {
         existingUser.setFirstname(firstname);
         existingUser.setLastname(lastname);
 
-        when(userRepository.getUserByName(firstname, lastname)).thenReturn(Optional.empty());
+        when(userRepository.getUserByFirstnameAndLastname(firstname, lastname)).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class)))
                 .thenThrow(new ConstraintViolationException("Unique constraint violation",
                         new SQLException(), "firstname, lastname"));
@@ -86,7 +85,7 @@ class UserServiceTests {
         final String firstname = null;
         final String lastname = null;
 
-        when(userRepository.getUserByName(firstname, lastname)).thenReturn(Optional.empty());
+        when(userRepository.getUserByFirstnameAndLastname(firstname, lastname)).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class)))
                 .thenThrow(new ConstraintViolationException("Not null constraint violation",
                         new SQLException(), "firstname, lastname"));
@@ -103,7 +102,7 @@ class UserServiceTests {
         user.setFirstname(firstname);
         user.setLastname(lastname);
 
-        when(userRepository.getUserByName(firstname, lastname)).thenReturn(Optional.empty());
+        when(userRepository.getUserByFirstnameAndLastname(firstname, lastname)).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         final User createdUser = userService.createUser(firstname, lastname);
@@ -121,7 +120,7 @@ class UserServiceTests {
         user.setFirstname(firstname);
         user.setLastname(lastname);
 
-        when(userRepository.getUserByName(firstname, lastname)).thenReturn(Optional.empty());
+        when(userRepository.getUserByFirstnameAndLastname(firstname, lastname)).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenThrow(new RuntimeException("Database error"));
 
         assertThrows(RuntimeException.class, () -> userService.createUser(firstname, lastname));
