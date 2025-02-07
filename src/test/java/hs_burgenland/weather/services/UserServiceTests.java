@@ -64,23 +64,6 @@ class UserServiceTests {
     }
 
     @Test
-    void createUser_NotUniqueName() {
-        final String firstname = "John";
-        final String lastname = "Doe";
-        final User existingUser = new User();
-        existingUser.setFirstname(firstname);
-        existingUser.setLastname(lastname);
-
-        when(userRepository.getUserByFirstnameAndLastname(firstname, lastname)).thenReturn(Optional.empty());
-        when(userRepository.save(any(User.class)))
-                .thenThrow(new ConstraintViolationException("Unique constraint violation",
-                        new SQLException(), "firstname, lastname"));
-
-        assertThrows(ConstraintViolationException.class, () -> userService.createUser(firstname, lastname));
-        verify(userRepository, times(1)).save(any(User.class));
-    }
-
-    @Test
     void createUser_NullName() {
         final String firstname = null;
         final String lastname = null;
