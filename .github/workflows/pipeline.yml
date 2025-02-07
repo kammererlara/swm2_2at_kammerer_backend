@@ -73,7 +73,7 @@ jobs:
           distribution: "corretto"
 
       - run: chmod +x ./gradlew
-      - run: ./gradlew clean test -Dspring.profiles.active=dev
+      - run: ./gradlew clean test
 
   hadolint:
     runs-on: ubuntu-latest
@@ -108,7 +108,7 @@ jobs:
           distribution: "corretto"
 
       - run: chmod +x ./gradlew
-      - run: ./gradlew clean build -Dspring.profiles.active=dev
+      - run: ./gradlew clean build
 
       - uses: actions/upload-artifact@v4.4.3
         with:
