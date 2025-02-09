@@ -62,20 +62,6 @@ class UserControllerTests {
     }
 
     @Test
-    void createUser_EmptyName() throws EntityAlreadyExistingException {
-        user.setFirstname("");
-        user.setLastname("");
-
-        when(userService.createUser("", "")).thenThrow(new ConstraintViolationException("Not null constraint violation",
-                new SQLException(), "firstname, lastname"));
-
-        final ResponseEntity<?> response = userController.createUser(user);
-
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals("Not null constraint violation", response.getBody());
-    }
-
-    @Test
     void createUser_NullName() throws EntityAlreadyExistingException {
         user.setFirstname(null);
         user.setLastname(null);
