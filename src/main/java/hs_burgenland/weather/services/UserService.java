@@ -15,13 +15,13 @@ public class UserService {
     public UserRepository userRepository;
 
     public User createUser(final String firstname, final String lastname) throws EntityAlreadyExistingException {
-        final User user = new User();
-        user.setFirstname(firstname);
-        user.setLastname(lastname);
-
         if (userRepository.getUserByFirstnameAndLastname(firstname, lastname).isPresent()) {
             throw new EntityAlreadyExistingException(String.format("User %s %s does already exist on this bank.", firstname, lastname));
         }
+
+        final User user = new User();
+        user.setFirstname(firstname);
+        user.setLastname(lastname);
 
         return userRepository.save(user);
     }
