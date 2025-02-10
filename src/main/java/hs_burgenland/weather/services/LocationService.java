@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -58,6 +59,10 @@ public class LocationService {
             throw new EntityNotFoundException("Location with id " + id + " not found.");
         }
         locationRepository.deleteById(id);
+    }
+
+    public Optional<Location> getLocationByName(final String name) {
+        return locationRepository.getLocationByName(name);
     }
 
     private void storeLocationData(final Location location)

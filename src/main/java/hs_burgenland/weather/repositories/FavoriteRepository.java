@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface FavoriteRepository extends JpaRepository<Favorite, Integer> {
     List<Favorite> findByUserId(int userId);
+    boolean existsByLocationIdAndUserId(int locationId, int userId);
+    boolean existsByName(String name);
 }
