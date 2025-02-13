@@ -35,6 +35,10 @@ public class LocationController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getLocationById(@PathVariable final int id) {
+        if (id < 0) {
+            return ResponseEntity.badRequest().body("Location id must be at least 0.");
+        }
+
         try {
             return ResponseEntity.ok(locationService.getLocationById(id));
         } catch (EntityNotFoundException e) {
@@ -46,6 +50,10 @@ public class LocationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteLocation(@PathVariable final int id) {
+        if (id < 0) {
+            return ResponseEntity.badRequest().body("Location id must be at least 0.");
+        }
+
         try {
             locationService.deleteLocation(id);
             return ResponseEntity.noContent().build();

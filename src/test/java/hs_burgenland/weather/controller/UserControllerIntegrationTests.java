@@ -4,7 +4,6 @@ import hs_burgenland.weather.entities.User;
 import hs_burgenland.weather.exceptions.EntityAlreadyExistingException;
 import hs_burgenland.weather.exceptions.EntityNotFoundException;
 import hs_burgenland.weather.services.UserService;
-import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
@@ -15,7 +14,6 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -63,15 +61,11 @@ class UserControllerIntegrationTests {
 
     @Test
     void createUser_wrongInput() throws Exception {
-        when(userService.createUser(null, "Doe")).thenThrow(new ConstraintViolationException(
-                "Not null constraint violation", new SQLException(), "firstname, lastname"));
-
         mvc.perform(post("/users")
                 .contentType("application/json")
                 .content("{\"age\": 34, \"lastname\": \"Doe\"}"))
-                .andExpect(status().isInternalServerError())
-                .andExpect(content().string("Not null constraint violation"));
-        verify(userService, times(1)).createUser(null, "Doe");
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("User must have a firstname and a lastname."));
     }
 
     @Test
@@ -92,19 +86,15 @@ class UserControllerIntegrationTests {
 
     @Test
     void createUser_emptyInput() throws Exception {
-        when(userService.createUser(null, null)).thenThrow(new ConstraintViolationException(
-                "Not null constraint violation", new SQLException(), "firstname, lastname"));
-
         mvc.perform(post("/users")
                 .contentType("application/json")
                 .content("{}"))
-                .andExpect(status().isInternalServerError())
-                .andExpect(content().string("Not null constraint violation"));
-        verify(userService, times(1)).createUser(null, null);
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("User must have a firstname and a lastname."));
     }
 
     @Test
-    void listUsers_happyPath() throws Exception {
+    void getAllUsers_happyPath() throws Exception {
         final User user = new User();
         user.setId(1);
         user.setFirstname("John");
@@ -119,7 +109,16 @@ class UserControllerIntegrationTests {
     }
 
     @Test
-    void readUser_happyPath() throws Exception {
+    void getAllUsers_emptyList() throws Exception {
+        when(userService.getAllUsers()).thenReturn(List.of());
+
+        mvc.perform(get("/users"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+    }
+
+    @Test
+    void getUserById_happyPath() throws Exception {
         final User user = new User();
         user.setId(1);
         user.setFirstname("John");
@@ -133,7 +132,7 @@ class UserControllerIntegrationTests {
     }
 
     @Test
-    void readUser_notExisting() throws Exception {
+    void getUserById_notExisting() throws Exception {
         when(userService.getUserById(99)).thenThrow(new EntityNotFoundException("User not found"));
 
         mvc.perform(get("/users/99"))
@@ -142,7 +141,14 @@ class UserControllerIntegrationTests {
     }
 
     @Test
-    void readUser_wrongInput() throws Exception {
+    void getUserById_wrongInputNumber() throws Exception {
+        mvc.perform(get("/users/-1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("User id must be at least 0."));
+    }
+
+    @Test
+    void getUserById_wrongInput() throws Exception {
         mvc.perform(get("/users/abc"))
                 .andExpect(status().isBadRequest());
     }
@@ -163,6 +169,13 @@ class UserControllerIntegrationTests {
         mvc.perform(delete("/users/99"))
                 .andExpect(status().isNotFound());
         verify(userService, times(1)).deleteUser(99);
+    }
+
+    @Test
+    void deleteUser_wrongInputNumber() throws Exception {
+        mvc.perform(delete("/users/-1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("User id must be greater than 0."));
     }
 
     @Test

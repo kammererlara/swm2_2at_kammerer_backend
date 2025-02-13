@@ -34,7 +34,7 @@ class LocationServiceTests {
     }
 
     @Test
-    void createLocation_Success() throws EntityAlreadyExistingException {
+    void createLocation_success() throws EntityAlreadyExistingException {
         when(apiRequestService.retrieveLocationData(any())).thenReturn("{\"results\":[{\"id\":2761369," +
                 "\"name\":\"Vienna\",\"latitude\":48.20849," +
                 "\"longitude\":16.37208,\"elevation\":171.0,\"feature_code\":\"PPLC\"," +
@@ -82,7 +82,7 @@ class LocationServiceTests {
     }
 
     @Test
-    void createLocation_AlreadyExisting() {
+    void createLocation_alreadyExisting() {
         when(apiRequestService.retrieveLocationData(any())).thenReturn("{\"results\":[{\"id\":2761369," +
                 "\"name\":\"Vienna\",\"latitude\":48.20849," +
                 "\"longitude\":16.37208,\"elevation\":171.0,\"feature_code\":\"PPLC\"," +
@@ -103,7 +103,7 @@ class LocationServiceTests {
     }
 
     @Test
-    void createLocation_NoLocationFound() throws JsonProcessingException {
+    void createLocation_noLocationFound() throws JsonProcessingException {
         when(apiRequestService.retrieveLocationData(any())).thenReturn("{\"generationtime_ms\":1.2620687}");
 
         assertThrows(InternalException.class, () -> locationService.createLocation("InvalidData"));
@@ -262,7 +262,7 @@ class LocationServiceTests {
     }
 
     @Test
-    void createLocation_DatabaseError() {
+    void createLocation_databaseError() {
         when(apiRequestService.retrieveLocationData(any())).thenReturn("{\"results\":[{\"name\":\"Vienna\"" +
                 ",\"latitude\":48.20849,\"longitude\":16.37208,\"elevation\":171.0," +
                 "\"country\":\"Austria\"}],\"generationtime_ms\":1.2409687}");
@@ -279,7 +279,7 @@ class LocationServiceTests {
     }
 
     @Test
-    void getAllLocations_ManyEntries() {
+    void getAllLocations_manyEntries() {
         final Location location1 = new Location();
         location1.setName("Vienna,Austria");
 
@@ -295,7 +295,7 @@ class LocationServiceTests {
     }
 
     @Test
-    void getAllLocations_Empty() {
+    void getAllLocations_empty() {
         when(locationRepository.findAll()).thenReturn(List.of());
 
         final List<Location> locations = locationService.getAllLocations();
@@ -304,7 +304,7 @@ class LocationServiceTests {
     }
 
     @Test
-    void getLocationById_EntryFound() throws EntityNotFoundException {
+    void getLocationById_entryFound() throws EntityNotFoundException {
         final Location location = new Location();
         location.setId(1);
         location.setName("Vienna,Austria");
@@ -323,14 +323,14 @@ class LocationServiceTests {
     }
 
     @Test
-    void getLocationById_NotExistingEntity() {
+    void getLocationById_notExistingEntity() {
         when(locationRepository.findById(1)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> locationService.getLocationById(1));
     }
 
     @Test
-    void deleteLocation_Success() throws EntityNotFoundException {
+    void deleteLocation_success() throws EntityNotFoundException {
         when(locationRepository.existsById(1)).thenReturn(true);
 
         locationService.deleteLocation(1);
@@ -339,7 +339,7 @@ class LocationServiceTests {
     }
 
     @Test
-    void deleteLocation_ThrowsEntityNotFoundException() {
+    void deleteLocation_throwsEntityNotFoundException() {
         when(locationRepository.existsById(1)).thenReturn(false);
 
         assertThrows(EntityNotFoundException.class, () -> locationService.deleteLocation(1));

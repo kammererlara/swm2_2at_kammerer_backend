@@ -42,7 +42,7 @@ class LocationControllerTests {
     }
 
     @Test
-    void createLocation_Success() throws EntityAlreadyExistingException {
+    void createLocation_success() throws EntityAlreadyExistingException {
         when(locationService.createLocation("Vienna")).thenReturn(location);
 
         final ResponseEntity<?> response = locationController.createLocation("Vienna");
@@ -56,7 +56,7 @@ class LocationControllerTests {
     }
 
     @Test
-    void createLocation_AlreadyExists() throws EntityAlreadyExistingException {
+    void createLocation_alreadyExists() throws EntityAlreadyExistingException {
         when(locationService.createLocation("Vienna"))
                 .thenThrow(new EntityAlreadyExistingException("Location Vienna,Austria does already exist on this bank."));
 
@@ -67,7 +67,7 @@ class LocationControllerTests {
     }
 
     @Test
-    void createLocation_EmptyName() throws EntityAlreadyExistingException {
+    void createLocation_emptyName() throws EntityAlreadyExistingException {
         when(locationService.createLocation("")).thenThrow(new InternalException("Error while processing location data."));
 
         final ResponseEntity<?> response = locationController.createLocation("");
@@ -77,7 +77,7 @@ class LocationControllerTests {
     }
 
     @Test
-    void createLocation_ServerError() throws EntityAlreadyExistingException {
+    void createLocation_serverError() throws EntityAlreadyExistingException {
         when(locationService.createLocation(anyString())).thenThrow(new RuntimeException("Unexpected error"));
 
         final ResponseEntity<?> response = locationController.createLocation("Vienna");
@@ -87,7 +87,7 @@ class LocationControllerTests {
     }
 
     @Test
-    void getAllLocations_EmptyList() {
+    void getAllLocations_emptyList() {
         when(locationService.getAllLocations()).thenReturn(List.of());
 
         final ResponseEntity<?> response = locationController.getAllLocations();
@@ -97,7 +97,7 @@ class LocationControllerTests {
     }
 
     @Test
-    void getAllLocations_WithEntries() {
+    void getAllLocations_withEntries() {
         final List<Location> locations = List.of(location, new Location());
         when(locationService.getAllLocations()).thenReturn(locations);
 
@@ -108,7 +108,7 @@ class LocationControllerTests {
     }
 
     @Test
-    void getAllLocations_ServerError() {
+    void getAllLocations_serverError() {
         when(locationService.getAllLocations()).thenThrow(new RuntimeException("Unexpected error"));
 
         final ResponseEntity<?> response = locationController.getAllLocations();
@@ -118,7 +118,7 @@ class LocationControllerTests {
     }
 
     @Test
-    void getLocationById_FoundEntry() throws EntityNotFoundException {
+    void getLocationById_foundEntry() throws EntityNotFoundException {
         when(locationService.getLocationById(1)).thenReturn(location);
 
         final ResponseEntity<?> response = locationController.getLocationById(1);
@@ -128,7 +128,7 @@ class LocationControllerTests {
     }
 
     @Test
-    void getLocationById_NotFound() throws EntityNotFoundException {
+    void getLocationById_notFound() throws EntityNotFoundException {
         when(locationService.getLocationById(1)).thenThrow(new EntityNotFoundException("Location with id 1 not found."));
 
         final ResponseEntity<?> response = locationController.getLocationById(1);
@@ -137,7 +137,15 @@ class LocationControllerTests {
     }
 
     @Test
-    void getLocationById_ServerError() throws EntityNotFoundException {
+    void getLocationById_wrongInputNumber() {
+        final ResponseEntity<?> response = locationController.getLocationById(-1);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Location id must be at least 0.", response.getBody());
+    }
+
+    @Test
+    void getLocationById_serverError() throws EntityNotFoundException {
         when(locationService.getLocationById(1)).thenThrow(new RuntimeException("Unexpected error"));
 
         final ResponseEntity<?> response = locationController.getLocationById(1);
@@ -147,7 +155,7 @@ class LocationControllerTests {
     }
 
     @Test
-    void deleteLocation_Success() throws EntityNotFoundException {
+    void deleteLocation_success() throws EntityNotFoundException {
         doNothing().when(locationService).deleteLocation(1);
 
         final ResponseEntity<?> response = locationController.deleteLocation(1);
@@ -157,7 +165,7 @@ class LocationControllerTests {
     }
 
     @Test
-    void deleteLocation_NotFound() throws EntityNotFoundException {
+    void deleteLocation_notFound() throws EntityNotFoundException {
         doThrow(new EntityNotFoundException("Location with id 1 not found.")).when(locationService).deleteLocation(1);
 
         final ResponseEntity<?> response = locationController.deleteLocation(1);
@@ -166,7 +174,15 @@ class LocationControllerTests {
     }
 
     @Test
-    void deleteLocation_ServerError() throws EntityNotFoundException {
+    void deleteLocation_wrongInputNumber() throws EntityNotFoundException {
+        final ResponseEntity<?> response = locationController.deleteLocation(-1);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Location id must be at least 0.", response.getBody());
+    }
+
+    @Test
+    void deleteLocation_serverError() throws EntityNotFoundException {
         doThrow(new RuntimeException("Unexpected error")).when(locationService).deleteLocation(1);
 
         final ResponseEntity<?> response = locationController.deleteLocation(1);

@@ -33,9 +33,9 @@ class FavoriteServiceTests {
     @InjectMocks
     private FavoriteService favoriteService;
 
-    Location location;
-    User user;
-    String name;
+    private Location location;
+    private User user;
+    private String name;
 
     @BeforeEach
     void setUp() {
@@ -55,7 +55,7 @@ class FavoriteServiceTests {
     }
 
     @Test
-    void createFavorite_HappyPath_UserAndLocationAlreadyExisting() throws EntityNotFoundException, EntityAlreadyExistingException {
+    void createFavorite_happyPath_userAndLocationAlreadyExisting() throws EntityNotFoundException, EntityAlreadyExistingException {
         final Favorite favorite = new Favorite();
         favorite.setLocation(location);
         favorite.setUser(user);
@@ -80,7 +80,7 @@ class FavoriteServiceTests {
     }
 
     @Test
-    void createFavorite_HappyPath_LocationNotExisting() throws EntityNotFoundException, EntityAlreadyExistingException {
+    void createFavorite_happyPath_locationNotExisting() throws EntityNotFoundException, EntityAlreadyExistingException {
         final Favorite favorite = new Favorite();
         favorite.setLocation(location);
         favorite.setUser(user);
@@ -104,7 +104,7 @@ class FavoriteServiceTests {
     }
 
     @Test
-    void createFavorite_HappyPath_LocationNotExisting_ExceptionAtCreatingLocation()
+    void createFavorite_locationNotExisting_exceptionAtCreatingLocation()
             throws EntityNotFoundException, EntityAlreadyExistingException {
         when(favoriteRepository.existsByName(name)).thenReturn(false);
         when(userService.getUserById(user.getId())).thenReturn(user);
@@ -119,7 +119,7 @@ class FavoriteServiceTests {
     }
 
     @Test
-    void createFavorite_UserNotExisting() throws EntityNotFoundException {
+    void createFavorite_userNotExisting() throws EntityNotFoundException {
         when(favoriteRepository.existsByName(name)).thenReturn(false);
         when(userService.getUserById(99))
                 .thenThrow(new EntityNotFoundException("User with id 99 not found."));
@@ -131,7 +131,7 @@ class FavoriteServiceTests {
     }
 
     @Test
-    void createFavorite_FavoriteWithNameAlreadyExisting() throws EntityNotFoundException {
+    void createFavorite_favoriteWithNameAlreadyExisting() {
         when(favoriteRepository.existsByName(name)).thenReturn(true);
 
         assertThrows(EntityAlreadyExistingException.class, () -> favoriteService.createFavorite(location.getName(), 99, name));
@@ -139,7 +139,7 @@ class FavoriteServiceTests {
     }
 
     @Test
-    void createFavorite_FavoriteWithUserAndLocationAlreadyExisting() throws EntityNotFoundException {
+    void createFavorite_favoriteWithUserAndLocationAlreadyExisting() throws EntityNotFoundException {
         when(favoriteRepository.existsByName(name)).thenReturn(false);
         when(userService.getUserById(user.getId())).thenReturn(user);
         when(locationService.getLocationByName(location.getName())).thenReturn(Optional.of(location));
@@ -153,7 +153,7 @@ class FavoriteServiceTests {
     }
 
     @Test
-    void createFavorite_DatabaseError() throws EntityNotFoundException, EntityAlreadyExistingException {
+    void createFavorite_databaseError() throws EntityNotFoundException, EntityAlreadyExistingException {
         when(favoriteRepository.existsByName(name)).thenReturn(false);
         when(userService.getUserById(user.getId())).thenReturn(user);
         when(locationService.getLocationByName(location.getName())).thenReturn(Optional.of(location));
@@ -169,7 +169,7 @@ class FavoriteServiceTests {
     }
 
     @Test
-    void getAllFavorites_Success() {
+    void getAllFavorites_success() {
         final List<Favorite> favorites = new ArrayList<>();
         favorites.add(new Favorite());
         favorites.add(new Favorite());
@@ -183,7 +183,7 @@ class FavoriteServiceTests {
     }
 
     @Test
-    void getAllFavorites_EmptyList() {
+    void getAllFavorites_emptyList() {
         when(favoriteRepository.findAll()).thenReturn(new ArrayList<>());
 
         final List<Favorite> foundFavorites = favoriteService.getAllFavorites();
@@ -193,7 +193,7 @@ class FavoriteServiceTests {
     }
 
     @Test
-    void getAllFavorites_DatabaseError() {
+    void getAllFavorites_databaseError() {
         when(favoriteRepository.findAll()).thenThrow(new RuntimeException("Database error"));
 
         assertThrows(RuntimeException.class, favoriteService::getAllFavorites);
@@ -201,12 +201,9 @@ class FavoriteServiceTests {
     }
 
     @Test
-    void getFavoritesByUserId_Success() {
-        final List<Favorite> favorites = new ArrayList<>();
-        favorites.add(new Favorite());
-        favorites.add(new Favorite());
-
-        when(favoriteRepository.findByUserId(1)).thenReturn(favorites);
+    void getFavoritesByUserId_success() throws EntityNotFoundException {
+        when(userService.getUserById(1)).thenReturn(new User());
+        when(favoriteRepository.findByUserId(1)).thenReturn(List.of(new Favorite(), new Favorite()));
 
         final List<Favorite> foundFavorites = favoriteService.getFavoritesByUserId(1);
 
@@ -215,7 +212,7 @@ class FavoriteServiceTests {
     }
 
     @Test
-    void getFavoritesByUserId_EmptyList() {
+    void getFavoritesByUserId_emptyList() throws EntityNotFoundException {
         when(favoriteRepository.findByUserId(1)).thenReturn(new ArrayList<>());
 
         final List<Favorite> foundFavorites = favoriteService.getFavoritesByUserId(1);
@@ -225,7 +222,15 @@ class FavoriteServiceTests {
     }
 
     @Test
-    void getFavoritesByUserId_DatabaseError() {
+    void getFavoritesByUserId_wrongInputNumber() throws EntityNotFoundException {
+        when(userService.getUserById(-1)).thenThrow(new EntityNotFoundException("User with id -1 not found."));
+
+        assertThrows(EntityNotFoundException.class, () -> favoriteService.getFavoritesByUserId(-1));
+        verify(userService, times(1)).getUserById(-1);
+    }
+
+    @Test
+    void getFavoritesByUserId_databaseError() {
         when(favoriteRepository.findByUserId(1)).thenThrow(new RuntimeException("Database error"));
 
         assertThrows(RuntimeException.class, () -> favoriteService.getFavoritesByUserId(1));
@@ -233,7 +238,7 @@ class FavoriteServiceTests {
     }
 
     @Test
-    void getFavoriteById_Success() throws EntityNotFoundException {
+    void getFavoriteById_success() throws EntityNotFoundException {
         final Favorite favorite = new Favorite();
         favorite.setId(1);
         favorite.setName(name);
@@ -252,7 +257,7 @@ class FavoriteServiceTests {
     }
 
     @Test
-    void getFavoriteById_NotFound() {
+    void getFavoriteById_notFound() {
         when(favoriteRepository.findById(99)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> favoriteService.getFavoriteById(99));
@@ -260,7 +265,7 @@ class FavoriteServiceTests {
     }
 
     @Test
-    void getFavoriteById_DatabaseError() {
+    void getFavoriteById_databaseError() {
         when(favoriteRepository.findById(1)).thenThrow(new RuntimeException("Database error"));
 
         assertThrows(RuntimeException.class, () -> favoriteService.getFavoriteById(1));
@@ -268,7 +273,7 @@ class FavoriteServiceTests {
     }
 
     @Test
-    void deleteFavorite_Success() throws EntityNotFoundException {
+    void deleteFavorite_success() throws EntityNotFoundException {
         when(favoriteRepository.existsById(1)).thenReturn(true);
 
         favoriteService.deleteFavorite(1);
@@ -277,7 +282,7 @@ class FavoriteServiceTests {
     }
 
     @Test
-    void deleteFavorite_NotFound() {
+    void deleteFavorite_notFound() {
         when(favoriteRepository.existsById(99)).thenReturn(false);
 
         assertThrows(EntityNotFoundException.class, () -> favoriteService.deleteFavorite(99));
@@ -285,7 +290,7 @@ class FavoriteServiceTests {
     }
 
     @Test
-    void deleteFavorite_DatabaseError() {
+    void deleteFavorite_databaseError() {
         when(favoriteRepository.existsById(1)).thenReturn(true);
         doThrow(new RuntimeException("Database error")).when(favoriteRepository).deleteById(1);
 
