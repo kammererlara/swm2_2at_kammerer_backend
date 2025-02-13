@@ -149,6 +149,26 @@ class UserControllerTests {
     }
 
     @Test
+    void getUserById_defaultUser() throws EntityNotFoundException {
+        user.setId(0);
+        when(userService.getUserById(0)).thenReturn(user);
+
+        final ResponseEntity<?> response = userController.getUserById(0);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(user, response.getBody());
+    }
+
+    @Test
+    void getUserById_defaultUser_notExisting() throws EntityNotFoundException {
+        when(userService.getUserById(0)).thenThrow(new EntityNotFoundException("User with id 0 not found."));
+
+        final ResponseEntity<?> response = userController.getUserById(0);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
     void deleteUser_success() throws EntityNotFoundException {
         doNothing().when(userService).deleteUser(1);
 
@@ -183,5 +203,12 @@ class UserControllerTests {
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals("Unexpected error", response.getBody());
+    }
+
+    @Test
+    void deleteUser_defaultUser() throws EntityNotFoundException {
+        final ResponseEntity<?> response = userController.deleteUser(0);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 }
