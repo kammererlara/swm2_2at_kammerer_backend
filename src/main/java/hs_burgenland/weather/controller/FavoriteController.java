@@ -1,6 +1,7 @@
 package hs_burgenland.weather.controller;
 
 import hs_burgenland.weather.entities.Favorite;
+import hs_burgenland.weather.entities.User;
 import hs_burgenland.weather.exceptions.EntityAlreadyExistingException;
 import hs_burgenland.weather.exceptions.EntityNotFoundException;
 import hs_burgenland.weather.services.FavoriteService;
@@ -14,11 +15,18 @@ public class FavoriteController {
     @Autowired
     private FavoriteService favoriteService;
 
+//    DefaultUser: id = 0
     @PostMapping
     public ResponseEntity<?> createFavorite(@RequestBody final Favorite favorite) {
         if (favorite.getName() == null || favorite.getName().isEmpty()
-                || favorite.getUser() == null || favorite.getLocation() == null) {
-            return ResponseEntity.badRequest().body("Name, user and location must be provided.");
+                 || favorite.getLocation() == null) {
+            return ResponseEntity.badRequest().body("Name and location must be provided.");
+        }
+
+        if (favorite.getUser() == null) {
+            final User user = new User();
+            user.setId(0);
+            favorite.setUser(user);
         }
 
         if (favorite.getUser().getId() < 0) {

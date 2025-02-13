@@ -6,7 +6,6 @@ import hs_burgenland.weather.exceptions.EntityNotFoundException;
 import hs_burgenland.weather.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,7 +39,7 @@ class UserControllerIntegrationTests {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        reset(userService);
     }
 
     @Test
@@ -154,6 +153,29 @@ class UserControllerIntegrationTests {
     }
 
     @Test
+    void getUserById_happyPath_defaultUser() throws Exception {
+        final User user = new User();
+        user.setId(0);
+        user.setFirstname("John");
+        user.setLastname("Doe");
+        when(userService.getUserById(0)).thenReturn(user);
+
+        mvc.perform(get("/users/0"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"id\": 0, \"firstname\": \"John\", \"lastname\": \"Doe\"}"));
+        verify(userService, times(1)).getUserById(0);
+    }
+
+    @Test
+    void getUserById_defaultUser_notExisting() throws Exception {
+        when(userService.getUserById(0)).thenThrow(new EntityNotFoundException("User not found"));
+
+        mvc.perform(get("/users/0"))
+                .andExpect(status().isNotFound());
+        verify(userService, times(1)).getUserById(0);
+    }
+
+    @Test
     void deleteUser_happyPath() throws Exception {
         doNothing().when(userService).deleteUser(1);
 
@@ -182,5 +204,12 @@ class UserControllerIntegrationTests {
     void deleteUser_wrongInput() throws Exception {
         mvc.perform(delete("/users/abc"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void deleteUser_defaultUser() throws Exception {
+        mvc.perform(delete("/users/0"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("User id must be greater than 0."));
     }
 }

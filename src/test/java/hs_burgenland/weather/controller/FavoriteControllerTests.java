@@ -133,7 +133,7 @@ class FavoriteControllerTests {
         final ResponseEntity<?> response = favoriteController.createFavorite(favorite);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Name, user and location must be provided.", response.getBody());
+        assertEquals("Name and location must be provided.", response.getBody());
     }
 
     @Test
@@ -145,6 +145,35 @@ class FavoriteControllerTests {
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals("Unexpected error", response.getBody());
+    }
+
+    @Test
+    void createFavorite_happyPath_defaultUser() throws EntityAlreadyExistingException, EntityNotFoundException {
+        favorite.getUser().setId(0);
+
+        final Location location = new Location();
+        location.setId(1);
+        location.setName("Vienna,Austria");
+        location.setLatitude(48.208_49);
+        location.setLongitude(16.372_08);
+        location.setElevation(171.0);
+        location.setIcao("LOWW");
+
+        final Favorite inputFavorite = new Favorite();
+        inputFavorite.setId(1);
+        inputFavorite.setLocation(location);
+        inputFavorite.setUser(null);
+        inputFavorite.setName("Home");
+
+        when(favoriteService.createFavorite(
+                favorite.getLocation().getName(), favorite.getUser().getId(), favorite.getName())).thenReturn(favorite);
+
+        final ResponseEntity<?> response = favoriteController.createFavorite(inputFavorite);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(favorite, Objects.requireNonNull(response.getBody()));
+        verify(favoriteService, times(1))
+                .createFavorite(favorite.getLocation().getName(), 0, favorite.getName());
     }
 
     @Test
@@ -165,7 +194,7 @@ class FavoriteControllerTests {
         final ResponseEntity<?> response = favoriteController.getAllFavorites();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(((List<?>) response.getBody()).isEmpty());
+        assertTrue(((List<?>) Objects.requireNonNull(response.getBody())).isEmpty());
     }
 
     @Test
@@ -214,7 +243,7 @@ class FavoriteControllerTests {
         final ResponseEntity<?> response = favoriteController.getFavoritesByUserId(99);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(((List<?>) response.getBody()).isEmpty());
+        assertTrue(((List<?>) Objects.requireNonNull(response.getBody())).isEmpty());
     }
 
     @Test
@@ -225,6 +254,17 @@ class FavoriteControllerTests {
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals("Unexpected error", response.getBody());
+    }
+
+    @Test
+    void getFavoritesByUserId_defaultUser() throws EntityNotFoundException {
+        final List<Favorite> favorites = List.of(favorite, new Favorite());
+        when(favoriteService.getFavoritesByUserId(0)).thenReturn(favorites);
+
+        final ResponseEntity<?> response = favoriteController.getFavoritesByUserId(0);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(favorites, response.getBody());
     }
 
     @Test
