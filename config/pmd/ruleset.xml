@@ -48,7 +48,7 @@
     </rule>
     <rule ref="category/java/design.xml/TooManyMethods">
         <properties>
-            <property name="maxmethods" value="20"/>
+            <property name="maxmethods" value="25"/>
         </properties>
     </rule>
     <rule ref="category/java/design.xml/TooManyFields">

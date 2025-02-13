@@ -41,7 +41,8 @@ public class FavoriteService {
         return favoriteRepository.findAll();
     }
 
-    public List<Favorite> getFavoritesByUserId(final int userId) {
+    public List<Favorite> getFavoritesByUserId(final int userId) throws EntityNotFoundException {
+        userService.getUserById(userId);
         return favoriteRepository.findByUserId(userId);
     }
 
@@ -78,7 +79,7 @@ public class FavoriteService {
         if (locationResult.isPresent()) {
             location = locationResult.get();
             if (favoriteRepository.existsByLocationIdAndUserId(location.getId(), userId)) {
-                throw new EntityAlreadyExistingException("Favorite with locationId " + location + " and userId " + userId + " already exists.");
+                throw new EntityAlreadyExistingException("Favorite with locationname " + location.getName() + " and userId " + userId + " already exists.");
             }
         } else {
             try {

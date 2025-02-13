@@ -90,7 +90,7 @@ class LocationControllerIntegrationTests {
     }
 
     @Test
-    void listLocations_happyPath() throws Exception {
+    void getAllLocations_happyPath() throws Exception {
         final Location location = new Location();
         location.setId(1);
         location.setName("Vienna,Austria");
@@ -111,7 +111,7 @@ class LocationControllerIntegrationTests {
     }
 
     @Test
-    void listLocations_Empty() throws Exception {
+    void getAllLocations_empty() throws Exception {
         when(locationService.getAllLocations()).thenReturn(List.of());
 
         mvc.perform(get("/locations"))
@@ -121,7 +121,7 @@ class LocationControllerIntegrationTests {
     }
 
     @Test
-    void readLocation_happyPath() throws Exception {
+    void getLocationById_happyPath() throws Exception {
         final Location location = new Location();
         location.setId(1);
         location.setName("Vienna,Austria");
@@ -139,7 +139,7 @@ class LocationControllerIntegrationTests {
     }
 
     @Test
-    void readLocation_notExisting() throws Exception {
+    void getLocationById_notExisting() throws Exception {
         when(locationService.getLocationById(99)).thenThrow(new EntityNotFoundException("Location not found"));
 
         mvc.perform(get("/locations/99"))
@@ -148,7 +148,14 @@ class LocationControllerIntegrationTests {
     }
 
     @Test
-    void readLocation_wrongInput() throws Exception {
+    void getLocationById_wrongInputNumber() throws Exception {
+        mvc.perform(get("/locations/-1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Location id must be at least 0."));
+    }
+
+    @Test
+    void getLocationById_wrongInput() throws Exception {
         mvc.perform(get("/locations/abc"))
                 .andExpect(status().isBadRequest());
     }
@@ -175,5 +182,12 @@ class LocationControllerIntegrationTests {
     void deleteLocation_wrongInput() throws Exception {
         mvc.perform(delete("/locations/abc"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void deleteLocation_wrongInputNumber() throws Exception {
+        mvc.perform(delete("/locations/-1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Location id must be at least 0."));
     }
 }
