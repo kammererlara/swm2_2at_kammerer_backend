@@ -1,6 +1,7 @@
 package hs_burgenland.weather.controller;
 
 import com.sun.jdi.InternalException;
+import hs_burgenland.weather.TestdataGenerator;
 import hs_burgenland.weather.entities.Location;
 import hs_burgenland.weather.exceptions.EntityAlreadyExistingException;
 import hs_burgenland.weather.exceptions.EntityNotFoundException;
@@ -45,13 +46,7 @@ class LocationControllerIntegrationTests {
 
     @Test
     void createLocation_happyPath() throws Exception {
-        final Location location = new Location();
-        location.setId(1);
-        location.setName("Vienna,Austria");
-        location.setLatitude(48.208_49);
-        location.setLongitude(16.372_08);
-        location.setElevation(171.0);
-        location.setIcao("LOWW");
+        final Location location = TestdataGenerator.generateLocationTestdata();
         when(locationService.createLocation("Vienna")).thenReturn(location);
 
         mvc.perform(post("/locations")
@@ -89,13 +84,7 @@ class LocationControllerIntegrationTests {
 
     @Test
     void getAllLocations_happyPath() throws Exception {
-        final Location location = new Location();
-        location.setId(1);
-        location.setName("Vienna,Austria");
-        location.setLatitude(48.208_49);
-        location.setLongitude(16.372_08);
-        location.setElevation(171.0);
-        location.setIcao("LOWW");
+        final Location location = TestdataGenerator.generateLocationTestdata();
 
         when(locationService.getAllLocations()).thenReturn(List.of(location, location));
 
@@ -120,13 +109,7 @@ class LocationControllerIntegrationTests {
 
     @Test
     void getLocationById_happyPath() throws Exception {
-        final Location location = new Location();
-        location.setId(1);
-        location.setName("Vienna,Austria");
-        location.setLatitude(48.208_49);
-        location.setLongitude(16.372_08);
-        location.setElevation(171.0);
-        location.setIcao("LOWW");
+        final Location location = TestdataGenerator.generateLocationTestdata();
         when(locationService.getLocationById(1)).thenReturn(location);
 
         mvc.perform(get("/locations/1"))

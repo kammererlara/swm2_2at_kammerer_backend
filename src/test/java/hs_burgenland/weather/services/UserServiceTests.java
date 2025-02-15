@@ -1,5 +1,6 @@
 package hs_burgenland.weather.services;
 
+import hs_burgenland.weather.TestdataGenerator;
 import hs_burgenland.weather.entities.User;
 import hs_burgenland.weather.exceptions.EntityAlreadyExistingException;
 import hs_burgenland.weather.exceptions.EntityNotFoundException;
@@ -34,32 +35,24 @@ class UserServiceTests {
 
     @Test
     void createUser_success() throws EntityAlreadyExistingException {
-        final String firstname = "John";
-        final String lastname = "Doe";
-        final User user = new User();
-        user.setFirstname(firstname);
-        user.setLastname(lastname);
+        final User user = TestdataGenerator.generateUserTestdata();
 
-        when(userRepository.getUserByFirstnameAndLastname(firstname, lastname)).thenReturn(Optional.empty());
+        when(userRepository.getUserByFirstnameAndLastname(user.getFirstname(), user.getLastname())).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-        final User createdUser = userService.createUser(firstname, lastname);
+        final User createdUser = userService.createUser(user.getFirstname(), user.getLastname());
 
-        assertEquals(firstname, createdUser.getFirstname());
-        assertEquals(lastname, createdUser.getLastname());
+        assertEquals(user, createdUser);
         verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
     void createUser_alreadyExists() {
-        final String firstname = "Jane";
-        final String lastname = "Doe";
-        final User existingUser = new User();
-        existingUser.setFirstname(firstname);
-        existingUser.setLastname(lastname);
-        when(userRepository.getUserByFirstnameAndLastname(firstname, lastname)).thenReturn(Optional.of(existingUser));
+        final User user = TestdataGenerator.generateUserTestdata();
 
-        assertThrows(EntityAlreadyExistingException.class, () -> userService.createUser(firstname, lastname));
+        when(userRepository.getUserByFirstnameAndLastname(user.getFirstname(), user.getLastname())).thenReturn(Optional.of(user));
+
+        assertThrows(EntityAlreadyExistingException.class, () -> userService.createUser(user.getFirstname(), user.getLastname()));
         verify(userRepository, never()).save(any(User.class));
     }
 
@@ -79,48 +72,39 @@ class UserServiceTests {
 
     @Test
     void createUser_emptyName() throws EntityAlreadyExistingException {
-        final String firstname = "";
-        final String lastname = "";
         final User user = new User();
-        user.setFirstname(firstname);
-        user.setLastname(lastname);
+        user.setFirstname("");
+        user.setLastname("");
 
-        when(userRepository.getUserByFirstnameAndLastname(firstname, lastname)).thenReturn(Optional.empty());
+        when(userRepository.getUserByFirstnameAndLastname(user.getFirstname(), user.getLastname())).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-        final User createdUser = userService.createUser(firstname, lastname);
+        final User createdUser = userService.createUser(user.getFirstname(), user.getLastname());
 
-        assertEquals(firstname, createdUser.getFirstname());
-        assertEquals(lastname, createdUser.getLastname());
+        assertEquals(user, createdUser);
         verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
     void createUser_databaseError() {
-        final String firstname = "John";
-        final String lastname = "Doe";
-        final User user = new User();
-        user.setFirstname(firstname);
-        user.setLastname(lastname);
+        final User user = TestdataGenerator.generateUserTestdata();
 
-        when(userRepository.getUserByFirstnameAndLastname(firstname, lastname)).thenReturn(Optional.empty());
+        when(userRepository.getUserByFirstnameAndLastname(user.getFirstname(), user.getLastname())).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenThrow(new RuntimeException("Database error"));
 
-        assertThrows(RuntimeException.class, () -> userService.createUser(firstname, lastname));
+        assertThrows(RuntimeException.class, () -> userService.createUser(user.getFirstname(), user.getLastname()));
         verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
     void getUserById_success() throws EntityNotFoundException {
-        final int userId = 1;
-        final User user = new User();
-        user.setId(userId);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        final User user = TestdataGenerator.generateUserTestdata();
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
-        final User foundUser = userService.getUserById(userId);
+        final User foundUser = userService.getUserById(user.getId());
 
-        assertEquals(userId, foundUser.getId());
-        verify(userRepository, times(1)).findById(userId);
+        assertEquals(user, foundUser);
+        verify(userRepository, times(1)).findById(user.getId());
     }
 
     @Test

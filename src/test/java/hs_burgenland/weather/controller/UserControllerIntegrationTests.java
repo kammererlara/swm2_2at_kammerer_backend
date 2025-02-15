@@ -1,5 +1,6 @@
 package hs_burgenland.weather.controller;
 
+import hs_burgenland.weather.TestdataGenerator;
 import hs_burgenland.weather.entities.User;
 import hs_burgenland.weather.exceptions.EntityAlreadyExistingException;
 import hs_burgenland.weather.exceptions.EntityNotFoundException;
@@ -44,10 +45,7 @@ class UserControllerIntegrationTests {
 
     @Test
     void createUser_happyPath() throws Exception {
-        final User user = new User();
-        user.setId(1);
-        user.setFirstname("John");
-        user.setLastname("Doe");
+        final User user = TestdataGenerator.generateUserTestdata();
         when(userService.createUser("John", "Doe")).thenReturn(user);
 
         mvc.perform(post("/users")
@@ -69,10 +67,6 @@ class UserControllerIntegrationTests {
 
     @Test
     void createUser_existingUser() throws Exception {
-        final User user = new User();
-        user.setId(1);
-        user.setFirstname("John");
-        user.setLastname("Doe");
         when(userService.createUser("John", "Doe")).thenThrow(new EntityAlreadyExistingException(
                 "User John Doe does already exist on this bank."));
 
@@ -94,10 +88,7 @@ class UserControllerIntegrationTests {
 
     @Test
     void getAllUsers_happyPath() throws Exception {
-        final User user = new User();
-        user.setId(1);
-        user.setFirstname("John");
-        user.setLastname("Doe");
+        final User user = TestdataGenerator.generateUserTestdata();
         when(userService.getAllUsers()).thenReturn(List.of(user, user));
 
         mvc.perform(get("/users"))
@@ -118,10 +109,7 @@ class UserControllerIntegrationTests {
 
     @Test
     void getUserById_happyPath() throws Exception {
-        final User user = new User();
-        user.setId(1);
-        user.setFirstname("John");
-        user.setLastname("Doe");
+        final User user = TestdataGenerator.generateUserTestdata();
         when(userService.getUserById(1)).thenReturn(user);
 
         mvc.perform(get("/users/1"))
@@ -154,10 +142,8 @@ class UserControllerIntegrationTests {
 
     @Test
     void getUserById_happyPath_defaultUser() throws Exception {
-        final User user = new User();
+        final User user = TestdataGenerator.generateUserTestdata();
         user.setId(0);
-        user.setFirstname("John");
-        user.setLastname("Doe");
         when(userService.getUserById(0)).thenReturn(user);
 
         mvc.perform(get("/users/0"))

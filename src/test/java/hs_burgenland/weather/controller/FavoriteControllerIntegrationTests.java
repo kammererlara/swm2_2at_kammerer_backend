@@ -1,9 +1,8 @@
 package hs_burgenland.weather.controller;
 
 import com.sun.jdi.InternalException;
+import hs_burgenland.weather.TestdataGenerator;
 import hs_burgenland.weather.entities.Favorite;
-import hs_burgenland.weather.entities.Location;
-import hs_burgenland.weather.entities.User;
 import hs_burgenland.weather.exceptions.EntityAlreadyExistingException;
 import hs_burgenland.weather.exceptions.EntityNotFoundException;
 import hs_burgenland.weather.services.FavoriteService;
@@ -47,24 +46,7 @@ class FavoriteControllerIntegrationTests {
     void setUp() {
         reset(favoriteService);
 
-        final Location location = new Location();
-        location.setId(1);
-        location.setName("Vienna,Austria");
-        location.setLatitude(48.208_49);
-        location.setLongitude(16.372_08);
-        location.setElevation(171.0);
-        location.setIcao("LOWW");
-
-        final User user = new User();
-        user.setId(1);
-        user.setFirstname("John");
-        user.setLastname("Doe");
-
-        favorite = new Favorite();
-        favorite.setId(1);
-        favorite.setLocation(location);
-        favorite.setUser(user);
-        favorite.setName("Home");
+        favorite = TestdataGenerator.generateFavoriteTestdata();
     }
 
     @Test
