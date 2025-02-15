@@ -1,6 +1,7 @@
 package hs_burgenland.weather.controller;
 
 import com.sun.jdi.InternalException;
+import hs_burgenland.weather.TestdataGenerator;
 import hs_burgenland.weather.entities.Location;
 import hs_burgenland.weather.exceptions.EntityAlreadyExistingException;
 import hs_burgenland.weather.exceptions.EntityNotFoundException;
@@ -32,13 +33,7 @@ class LocationControllerTests {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        location = new Location();
-        location.setId(1);
-        location.setName("Vienna,Austria");
-        location.setLatitude(48.208_49);
-        location.setLongitude(16.372_08);
-        location.setElevation(171.0);
-        location.setIcao("LOWW");
+        location = TestdataGenerator.generateLocationTestdata();
     }
 
     @Test

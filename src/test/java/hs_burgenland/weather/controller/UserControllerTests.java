@@ -1,5 +1,6 @@
 package hs_burgenland.weather.controller;
 
+import hs_burgenland.weather.TestdataGenerator;
 import hs_burgenland.weather.entities.User;
 import hs_burgenland.weather.exceptions.EntityAlreadyExistingException;
 import hs_burgenland.weather.exceptions.EntityNotFoundException;
@@ -31,10 +32,7 @@ class UserControllerTests {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        user = new User();
-        user.setId(1);
-        user.setFirstname("John");
-        user.setLastname("Doe");
+        user = TestdataGenerator.generateUserTestdata();
     }
 
     @Test

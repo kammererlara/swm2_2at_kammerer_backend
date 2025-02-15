@@ -1,6 +1,7 @@
 package hs_burgenland.weather.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import hs_burgenland.weather.TestdataGenerator;
 import hs_burgenland.weather.entities.Location;
 import hs_burgenland.weather.exceptions.EntityAlreadyExistingException;
 import hs_burgenland.weather.exceptions.EntityNotFoundException;
@@ -61,12 +62,7 @@ class LocationServiceTests {
                 "\"state\":\"9\",\"type\":\"large_airport\",\"website\":\"http://www.viennaairport.com/en/\"," +
                 "\"wiki\":\"https://en.wikipedia.org/wiki/Vienna_International_Airport\"}}]\n");
 
-        final Location expectedLocation = new Location();
-        expectedLocation.setName("Vienna,Austria");
-        expectedLocation.setLatitude(48.208_49);
-        expectedLocation.setLongitude(16.372_08);
-        expectedLocation.setElevation(171.0);
-        expectedLocation.setIcao("LOWW");
+        final Location expectedLocation = TestdataGenerator.generateLocationTestdata();
 
         locationService.createLocation("Vienna");
 
@@ -93,9 +89,7 @@ class LocationServiceTests {
                 "\"1190\",\"1200\",\"1210\",\"1220\",\"1230\"],\"country_id\":2782113,\"country\":\"Austria\"," +
                 "\"admin1\":\"Vienna\",\"admin2\":\"Vienna\"}],\"generationtime_ms\":1.2409687}");
 
-        final Location location = new Location();
-        location.setLatitude(48.208_49);
-        location.setLongitude(16.372_08);
+        final Location location = TestdataGenerator.generateLocationTestdata();
         when(locationRepository.getLocationByLatitudeAndLongitude(48.208_49, 16.372_08))
                 .thenReturn(Optional.of(location));
 
@@ -305,21 +299,13 @@ class LocationServiceTests {
 
     @Test
     void getLocationById_entryFound() throws EntityNotFoundException {
-        final Location location = new Location();
-        location.setId(1);
-        location.setName("Vienna,Austria");
-        location.setLatitude(48.208_49);
-        location.setLongitude(16.372_08);
-        location.setElevation(171.0);
+        final Location location = TestdataGenerator.generateLocationTestdata();
 
         when(locationRepository.findById(1)).thenReturn(Optional.of(location));
 
         final Location result = locationService.getLocationById(1);
 
-        assertEquals("Vienna,Austria", result.getName());
-        assertEquals(48.208_49, result.getLatitude());
-        assertEquals(16.372_08, result.getLongitude());
-        assertEquals(171.0, result.getElevation());
+        assertEquals(location, result);
     }
 
     @Test

@@ -1,7 +1,7 @@
 package hs_burgenland.weather.services;
 
+import hs_burgenland.weather.TestdataGenerator;
 import hs_burgenland.weather.entities.Favorite;
-import hs_burgenland.weather.entities.Location;
 import hs_burgenland.weather.entities.User;
 import hs_burgenland.weather.exceptions.EntityAlreadyExistingException;
 import hs_burgenland.weather.exceptions.EntityNotFoundException;
@@ -33,138 +33,115 @@ class FavoriteServiceTests {
     @InjectMocks
     private FavoriteService favoriteService;
 
-    private Location location;
-    private User user;
-    private String name;
+    private Favorite favorite;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        location = new Location();
-        location.setId(1);
-        location.setName("Vienna,Austria");
-        location.setLatitude(48.208_49);
-        location.setLongitude(16.372_08);
-        location.setElevation(171.0);
-        location.setIcao("LOWW");
-        user = new User();
-        user.setId(1);
-        user.setFirstname("John");
-        user.setLastname("Doe");
-        name = "Home";
+        favorite = TestdataGenerator.generateFavoriteTestdata();
     }
 
     @Test
     void createFavorite_happyPath_userAndLocationAlreadyExisting() throws EntityNotFoundException, EntityAlreadyExistingException {
-        final Favorite favorite = new Favorite();
-        favorite.setLocation(location);
-        favorite.setUser(user);
-        favorite.setName(name);
+        final Favorite favorite = TestdataGenerator.generateFavoriteTestdata();
 
-        when(favoriteRepository.existsByNameAndUserId(name, user.getId())).thenReturn(false);
-        when(userService.getUserById(user.getId())).thenReturn(user);
-        when(locationService.getLocationByName(location.getName())).thenReturn(Optional.of(location));
-        when(favoriteRepository.existsByLocationIdAndUserId(location.getId(), user.getId())).thenReturn(false);
+        when(favoriteRepository.existsByNameAndUserId(favorite.getName(), favorite.getUser().getId())).thenReturn(false);
+        when(userService.getUserById(favorite.getUser().getId())).thenReturn(favorite.getUser());
+        when(locationService.getLocationByName(favorite.getLocation().getName())).thenReturn(Optional.of(favorite.getLocation()));
+        when(favoriteRepository.existsByLocationIdAndUserId(favorite.getLocation().getId(), favorite.getUser().getId())).thenReturn(false);
         when(favoriteRepository.save(any(Favorite.class))).thenReturn(favorite);
 
-        final Favorite createdFavorite = favoriteService.createFavorite(location.getName(), user.getId(), name);
+        final Favorite createdFavorite = favoriteService.createFavorite(favorite.getLocation().getName(), favorite.getUser().getId(), favorite.getName());
 
-        assertEquals(name, createdFavorite.getName());
-        assertEquals(user, createdFavorite.getUser());
-        assertEquals(location, createdFavorite.getLocation());
-        verify(favoriteRepository, times(1)).existsByNameAndUserId(name, user.getId());
-        verify(userService, times(1)).getUserById(user.getId());
-        verify(locationService, times(1)).getLocationByName(location.getName());
-        verify(favoriteRepository, times(1)).existsByLocationIdAndUserId(location.getId(), user.getId());
+        assertEquals(favorite, createdFavorite);
+        verify(favoriteRepository, times(1)).existsByNameAndUserId(favorite.getName(), favorite.getUser().getId());
+        verify(userService, times(1)).getUserById(favorite.getUser().getId());
+        verify(locationService, times(1)).getLocationByName(favorite.getLocation().getName());
+        verify(favoriteRepository, times(1)).existsByLocationIdAndUserId(favorite.getLocation().getId(), favorite.getUser().getId());
         verify(favoriteRepository, times(1)).save(any(Favorite.class));
     }
 
     @Test
     void createFavorite_happyPath_locationNotExisting() throws EntityNotFoundException, EntityAlreadyExistingException {
-        final Favorite favorite = new Favorite();
-        favorite.setLocation(location);
-        favorite.setUser(user);
-        favorite.setName(name);
+        final Favorite favorite = TestdataGenerator.generateFavoriteTestdata();
 
-        when(favoriteRepository.existsByNameAndUserId(name, user.getId())).thenReturn(false);
-        when(userService.getUserById(user.getId())).thenReturn(user);
-        when(locationService.getLocationByName(location.getName())).thenReturn(Optional.empty());
-        when(locationService.createLocation(location.getName())).thenReturn(location);
+        when(favoriteRepository.existsByNameAndUserId(favorite.getName(), favorite.getUser().getId())).thenReturn(false);
+        when(userService.getUserById(favorite.getUser().getId())).thenReturn(favorite.getUser());
+        when(locationService.getLocationByName(favorite.getLocation().getName())).thenReturn(Optional.empty());
+        when(locationService.createLocation(favorite.getLocation().getName())).thenReturn(favorite.getLocation());
         when(favoriteRepository.save(any(Favorite.class))).thenReturn(favorite);
 
-        final Favorite createdFavorite = favoriteService.createFavorite(location.getName(), user.getId(), name);
+        final Favorite createdFavorite = favoriteService.createFavorite(favorite.getLocation().getName(), favorite.getUser().getId(), favorite.getName());
 
-        assertEquals(name, createdFavorite.getName());
-        assertEquals(user, createdFavorite.getUser());
-        assertEquals(location, createdFavorite.getLocation());
-        verify(favoriteRepository, times(1)).existsByNameAndUserId(name, user.getId());
-        verify(userService, times(1)).getUserById(user.getId());
-        verify(locationService, times(1)).getLocationByName(location.getName());
+        assertEquals(favorite, createdFavorite);
+        verify(favoriteRepository, times(1)).existsByNameAndUserId(favorite.getName(), favorite.getUser().getId());
+        verify(userService, times(1)).getUserById(favorite.getUser().getId());
+        verify(locationService, times(1)).getLocationByName(favorite.getLocation().getName());
         verify(favoriteRepository, times(1)).save(any(Favorite.class));
     }
 
     @Test
     void createFavorite_locationNotExisting_exceptionAtCreatingLocation()
             throws EntityNotFoundException, EntityAlreadyExistingException {
-        when(favoriteRepository.existsByNameAndUserId(name, user.getId())).thenReturn(false);
-        when(userService.getUserById(user.getId())).thenReturn(user);
-        when(locationService.getLocationByName(location.getName())).thenReturn(Optional.empty());
-        when(locationService.createLocation(location.getName())).thenThrow(new RuntimeException("Database error"));
+        when(favoriteRepository.existsByNameAndUserId(favorite.getName(), favorite.getUser().getId())).thenReturn(false);
+        when(userService.getUserById(favorite.getUser().getId())).thenReturn(favorite.getUser());
+        when(locationService.getLocationByName(favorite.getLocation().getName())).thenReturn(Optional.empty());
+        when(locationService.createLocation(favorite.getLocation().getName())).thenThrow(new RuntimeException("Database error"));
 
-        assertThrows(RuntimeException.class, () -> favoriteService.createFavorite(location.getName(), user.getId(), name));
-        verify(favoriteRepository, times(1)).existsByNameAndUserId(name, user.getId());
-        verify(userService, times(1)).getUserById(user.getId());
-        verify(locationService, times(1)).getLocationByName(location.getName());
+        assertThrows(RuntimeException.class, () -> favoriteService.createFavorite(favorite.getLocation().getName(), favorite.getUser().getId(), favorite.getName()));
+        verify(favoriteRepository, times(1)).existsByNameAndUserId(favorite.getName(), favorite.getUser().getId());
+        verify(userService, times(1)).getUserById(favorite.getUser().getId());
+        verify(locationService, times(1)).getLocationByName(favorite.getLocation().getName());
         verify(locationService, times(1)).createLocation(any());
     }
 
     @Test
     void createFavorite_userNotExisting() throws EntityNotFoundException {
-        when(favoriteRepository.existsByNameAndUserId(name, 99)).thenReturn(false);
+        when(favoriteRepository.existsByNameAndUserId(favorite.getName(), 99)).thenReturn(false);
         when(userService.getUserById(99))
                 .thenThrow(new EntityNotFoundException("User with id 99 not found."));
 
-        assertThrows(EntityNotFoundException.class, () -> favoriteService.createFavorite(location.getName(), 99, name));
-        verify(favoriteRepository, times(1)).existsByNameAndUserId(name, 99);
+        assertThrows(EntityNotFoundException.class, () -> favoriteService.createFavorite(favorite.getLocation().getName(), 99, favorite.getName()));
+        verify(favoriteRepository, times(1)).existsByNameAndUserId(favorite.getName(), 99);
         verify(userService, times(1)).getUserById(99);
         verify(locationService, times(0)).getLocationByName(any());
     }
 
     @Test
     void createFavorite_favoriteWithNameAlreadyExisting() {
-        when(favoriteRepository.existsByNameAndUserId(name, user.getId())).thenReturn(true);
+        when(favoriteRepository.existsByNameAndUserId(favorite.getName(), favorite.getUser().getId())).thenReturn(true);
 
-        assertThrows(EntityAlreadyExistingException.class, () -> favoriteService.createFavorite(location.getName(), user.getId(), name));
-        verify(favoriteRepository, times(1)).existsByNameAndUserId(name, user.getId());
+        assertThrows(EntityAlreadyExistingException.class, () -> favoriteService.createFavorite(favorite.getLocation().getName(), favorite.getUser().getId(), favorite.getName()));
+        verify(favoriteRepository, times(1)).existsByNameAndUserId(favorite.getName(), favorite.getUser().getId());
     }
 
     @Test
     void createFavorite_favoriteWithUserAndLocationAlreadyExisting() throws EntityNotFoundException {
-        when(favoriteRepository.existsByNameAndUserId(name, user.getId())).thenReturn(false);
-        when(userService.getUserById(user.getId())).thenReturn(user);
-        when(locationService.getLocationByName(location.getName())).thenReturn(Optional.of(location));
-        when(favoriteRepository.existsByLocationIdAndUserId(location.getId(), user.getId())).thenReturn(true);
+        when(favoriteRepository.existsByNameAndUserId(favorite.getName(), favorite.getUser().getId())).thenReturn(false);
+        when(userService.getUserById(favorite.getUser().getId())).thenReturn(favorite.getUser());
+        when(locationService.getLocationByName(favorite.getLocation().getName())).thenReturn(Optional.of(favorite.getLocation()));
+        when(favoriteRepository.existsByLocationIdAndUserId(favorite.getLocation().getId(), favorite.getUser().getId())).thenReturn(true);
 
-        assertThrows(EntityAlreadyExistingException.class, () -> favoriteService.createFavorite(location.getName(), user.getId(), name));
-        verify(favoriteRepository, times(1)).existsByNameAndUserId(name, user.getId());
-        verify(userService, times(1)).getUserById(user.getId());
-        verify(locationService, times(1)).getLocationByName(location.getName());
-        verify(favoriteRepository, times(1)).existsByLocationIdAndUserId(location.getId(), user.getId());
+        assertThrows(EntityAlreadyExistingException.class, () -> favoriteService.createFavorite(favorite.getLocation().getName(), favorite.getUser().getId(), favorite.getName()));
+        verify(favoriteRepository, times(1)).existsByNameAndUserId(favorite.getName(), favorite.getUser().getId());
+        verify(userService, times(1)).getUserById(favorite.getUser().getId());
+        verify(locationService, times(1)).getLocationByName(favorite.getLocation().getName());
+        verify(favoriteRepository, times(1)).existsByLocationIdAndUserId(favorite.getLocation().getId(), favorite.getUser().getId());
     }
 
     @Test
     void createFavorite_databaseError() throws EntityNotFoundException, EntityAlreadyExistingException {
-        when(favoriteRepository.existsByNameAndUserId(name, user.getId())).thenReturn(false);
-        when(userService.getUserById(user.getId())).thenReturn(user);
-        when(locationService.getLocationByName(location.getName())).thenReturn(Optional.of(location));
-        when(favoriteRepository.existsByLocationIdAndUserId(location.getId(), user.getId())).thenReturn(false);
+        when(favoriteRepository.existsByNameAndUserId(favorite.getName(), favorite.getUser().getId())).thenReturn(false);
+        when(userService.getUserById(favorite.getUser().getId())).thenReturn(favorite.getUser());
+        when(locationService.getLocationByName(favorite.getLocation().getName())).thenReturn(Optional.of(favorite.getLocation()));
+        when(favoriteRepository.existsByLocationIdAndUserId(favorite.getLocation().getId(), favorite.getUser().getId())).thenReturn(false);
         when(favoriteRepository.save(any(Favorite.class))).thenThrow(new RuntimeException("Database error"));
 
-        assertThrows(RuntimeException.class, () -> favoriteService.createFavorite(location.getName(), user.getId(), name));
-        verify(favoriteRepository, times(1)).existsByNameAndUserId(name, user.getId());
-        verify(userService, times(1)).getUserById(user.getId());
-        verify(locationService, times(1)).getLocationByName(location.getName());
-        verify(favoriteRepository, times(1)).existsByLocationIdAndUserId(location.getId(), user.getId());
+        assertThrows(RuntimeException.class, () -> favoriteService.createFavorite(favorite.getLocation().getName(), favorite.getUser().getId(), favorite.getName()));
+        verify(favoriteRepository, times(1)).existsByNameAndUserId(favorite.getName(), favorite.getUser().getId());
+        verify(userService, times(1)).getUserById(favorite.getUser().getId());
+        verify(locationService, times(1)).getLocationByName(favorite.getLocation().getName());
+        verify(favoriteRepository, times(1)).existsByLocationIdAndUserId(favorite.getLocation().getId(), favorite.getUser().getId());
         verify(favoriteRepository, times(1)).save(any(Favorite.class));
     }
 
@@ -239,20 +216,12 @@ class FavoriteServiceTests {
 
     @Test
     void getFavoriteById_success() throws EntityNotFoundException {
-        final Favorite favorite = new Favorite();
-        favorite.setId(1);
-        favorite.setName(name);
-        favorite.setUser(user);
-        favorite.setLocation(location);
-
         when(favoriteRepository.findById(1)).thenReturn(Optional.of(favorite));
 
         final Favorite foundFavorite = favoriteService.getFavoriteById(1);
 
         assertEquals(1, foundFavorite.getId());
-        assertEquals(name, foundFavorite.getName());
-        assertEquals(user, foundFavorite.getUser());
-        assertEquals(location, foundFavorite.getLocation());
+        assertEquals(favorite, foundFavorite);
         verify(favoriteRepository, times(1)).findById(1);
     }
 
