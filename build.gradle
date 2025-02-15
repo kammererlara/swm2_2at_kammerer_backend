@@ -50,3 +50,13 @@ test {
     environment "SPRING_PROFILES_ACTIVE", "dev"
     useJUnitPlatform()
 }
+
+tasks.withType(ProcessResources).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+processResources {
+    from('src/main/resources') {
+        include '**/*.sql'
+    }
+}
