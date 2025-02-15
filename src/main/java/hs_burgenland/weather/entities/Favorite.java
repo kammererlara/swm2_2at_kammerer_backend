@@ -7,7 +7,10 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"userId", "locationId"})})
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"userId", "locationId"}),
+        @UniqueConstraint(columnNames = {"userId", "name"})
+})
 public class Favorite {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,6 +21,6 @@ public class Favorite {
     @Column(nullable = false)
     private String name;
     @ManyToOne
-    @JoinColumn(name = "locationId", nullable = false, unique = true)
+    @JoinColumn(name = "locationId", nullable = false)
     private Location location;
 }

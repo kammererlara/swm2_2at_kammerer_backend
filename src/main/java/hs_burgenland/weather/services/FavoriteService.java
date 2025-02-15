@@ -30,7 +30,7 @@ public class FavoriteService {
 
         final Favorite favorite = new Favorite();
 
-        setFavoriteName(name, favorite);
+        setFavoriteName(name, favorite, userId);
         setFavoriteUser(userId, favorite);
         setFavoriteLocation(locationName, userId, favorite);
 
@@ -58,8 +58,8 @@ public class FavoriteService {
         favoriteRepository.deleteById(id);
     }
 
-    private void setFavoriteName(final String name, final Favorite favorite) throws EntityAlreadyExistingException {
-        if (favoriteRepository.existsByName(name)) {
+    private void setFavoriteName(final String name, final Favorite favorite, final int userId) throws EntityAlreadyExistingException {
+        if (favoriteRepository.existsByNameAndUserId(name, userId)) {
             throw new EntityAlreadyExistingException("Location with name " + name + " is already a favorite location.");
         }
         favorite.setName(name);
