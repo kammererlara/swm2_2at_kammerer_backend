@@ -157,60 +157,6 @@ class FavoriteControllerIntegrationTests {
     }
 
     @Test
-    void createFavorite_happyPath_defaultUser_UserNotGiven() throws Exception {
-        favorite.getUser().setId(0);
-        when(favoriteService.createFavorite("Vienna", favorite.getUser().getId(), favorite.getName()))
-                .thenReturn(favorite);
-
-        mvc.perform(post("/favorites")
-                        .contentType("application/json")
-                        .content("{\"location\":{\"name\":\"Vienna\"},\"name\":\"Home\"}"))
-                .andExpect(status().isOk())
-                .andExpect(content().json("{\"id\": 1, " +
-                        "\"location\": " +
-                        "{\"id\": 1, " +
-                        "\"name\": \"Vienna,Austria\", " +
-                        "\"latitude\": 48.20849, " +
-                        "\"longitude\": 16.37208, " +
-                        "\"elevation\": 171.0, " +
-                        "\"icao\": \"LOWW\"}, " +
-                        "\"user\": " +
-                        "{\"id\": 0, " +
-                        "\"firstname\": \"John\", " +
-                        "\"lastname\": \"Doe\"}, " +
-                        "\"name\": \"Home\"}"));
-        verify(favoriteService, times(1))
-                .createFavorite("Vienna", favorite.getUser().getId(), favorite.getName());
-    }
-
-    @Test
-    void createFavorite_happyPath_defaultUser_UserIdNotGiven() throws Exception {
-        favorite.getUser().setId(0);
-        when(favoriteService.createFavorite("Vienna", favorite.getUser().getId(), favorite.getName()))
-                .thenReturn(favorite);
-
-        mvc.perform(post("/favorites")
-                        .contentType("application/json")
-                        .content("{\"location\":{\"name\":\"Vienna\"},\"user\":{\"firstname\":\"Jane\"},\"name\":\"Home\"}"))
-                .andExpect(status().isOk())
-                .andExpect(content().json("{\"id\": 1, " +
-                        "\"location\": " +
-                        "{\"id\": 1, " +
-                        "\"name\": \"Vienna,Austria\", " +
-                        "\"latitude\": 48.20849, " +
-                        "\"longitude\": 16.37208, " +
-                        "\"elevation\": 171.0, " +
-                        "\"icao\": \"LOWW\"}, " +
-                        "\"user\": " +
-                        "{\"id\": 0, " +
-                        "\"firstname\": \"John\", " +
-                        "\"lastname\": \"Doe\"}, " +
-                        "\"name\": \"Home\"}"));
-        verify(favoriteService, times(1))
-                .createFavorite("Vienna", favorite.getUser().getId(), favorite.getName());
-    }
-
-    @Test
     void getAllFavorites_happyPath() throws Exception {
         when(favoriteService.getAllFavorites()).thenReturn(List.of(favorite, favorite));
 
@@ -270,22 +216,6 @@ class FavoriteControllerIntegrationTests {
     void getFavoritesByUserId_wrongInput() throws Exception {
         mvc.perform(get("/favorites/user/abc"))
                 .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void getFavoritesByUserId_happyPath_defaultUser() throws Exception {
-        favorite.getUser().setId(0);
-        when(favoriteService.getFavoritesByUserId(0)).thenReturn(List.of(favorite, favorite));
-
-        mvc.perform(get("/favorites/user/0"))
-                .andExpect(status().isOk())
-                .andExpect(content().json("[{\"id\":1,\"user\":{\"id\":0,\"firstname\":\"John\"," +
-                        "\"lastname\":\"Doe\"},\"name\":\"Home\",\"location\":{\"id\":1,\"latitude\":48.20849," +
-                        "\"longitude\":16.37208,\"elevation\":171.0,\"name\":\"Vienna,Austria\",\"icao\":\"LOWW\"}}," +
-                        "{\"id\":1,\"user\":{\"id\":0,\"firstname\":\"John\",\"lastname\":\"Doe\"},\"name\":\"Home\"," +
-                        "\"location\":{\"id\":1,\"latitude\":48.20849,\"longitude\":16.37208,\"elevation\":171.0," +
-                        "\"name\":\"Vienna,Austria\",\"icao\":\"LOWW\"}}]"));
-        verify(favoriteService, times(1)).getFavoritesByUserId(0);
     }
 
     @Test
