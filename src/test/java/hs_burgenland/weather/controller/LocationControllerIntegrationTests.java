@@ -147,9 +147,9 @@ class LocationControllerIntegrationTests {
 
     @Test
     void getLocationById_wrongInputNumber() throws Exception {
-        mvc.perform(get("/locations/-1"))
+        mvc.perform(get("/locations/0"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Location id must be at least 0."));
+                .andExpect(content().string("Location id must be greater than 0."));
     }
 
     @Test
@@ -184,8 +184,8 @@ class LocationControllerIntegrationTests {
 
     @Test
     void deleteLocation_wrongInputNumber() throws Exception {
-        mvc.perform(delete("/locations/-1"))
+        mvc.perform(delete("/locations/0"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Location id must be at least 0."));
+                .andExpect(content().string("Location id must be greater than 0."));
     }
 }
