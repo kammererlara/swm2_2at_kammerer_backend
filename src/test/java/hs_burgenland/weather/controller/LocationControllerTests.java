@@ -138,10 +138,10 @@ class LocationControllerTests {
 
     @Test
     void getLocationById_wrongInputNumber() {
-        final ResponseEntity<?> response = locationController.getLocationById(-1);
+        final ResponseEntity<?> response = locationController.getLocationById(0);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Location id must be at least 0.", response.getBody());
+        assertEquals("Location id must be greater than 0.", response.getBody());
     }
 
     @Test
@@ -175,10 +175,10 @@ class LocationControllerTests {
 
     @Test
     void deleteLocation_wrongInputNumber() throws EntityNotFoundException {
-        final ResponseEntity<?> response = locationController.deleteLocation(-1);
+        final ResponseEntity<?> response = locationController.deleteLocation(0);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Location id must be at least 0.", response.getBody());
+        assertEquals("Location id must be greater than 0.", response.getBody());
     }
 
     @Test

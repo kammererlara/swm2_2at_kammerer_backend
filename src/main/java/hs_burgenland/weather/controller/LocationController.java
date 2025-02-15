@@ -35,8 +35,8 @@ public class LocationController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getLocationById(@PathVariable final int id) {
-        if (id < 0) {
-            return ResponseEntity.badRequest().body("Location id must be at least 0.");
+        if (id <= 0) {
+            return ResponseEntity.badRequest().body("Location id must be greater than 0.");
         }
 
         try {
@@ -50,8 +50,8 @@ public class LocationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteLocation(@PathVariable final int id) {
-        if (id < 0) {
-            return ResponseEntity.badRequest().body("Location id must be at least 0.");
+        if (id <= 0) {
+            return ResponseEntity.badRequest().body("Location id must be greater than 0.");
         }
 
         try {
