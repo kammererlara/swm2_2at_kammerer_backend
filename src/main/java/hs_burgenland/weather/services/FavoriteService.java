@@ -67,26 +67,19 @@ public class FavoriteService {
 
     private void setFavoriteUser(final int userId, final Favorite favorite) throws EntityNotFoundException {
         final User user = userService.getUserById(userId);
-        if (user == null) {
-            throw new EntityNotFoundException("User with id " + userId + " not found.");
-        }
         favorite.setUser(user);
     }
 
     private void setFavoriteLocation(final String locationName, final int userId, final Favorite favorite) throws EntityAlreadyExistingException {
         final Optional<Location> locationResult = locationService.getLocationByName(locationName);
-        Location location = new Location();
+        final Location location;
         if (locationResult.isPresent()) {
             location = locationResult.get();
             if (favoriteRepository.existsByLocationIdAndUserId(location.getId(), userId)) {
                 throw new EntityAlreadyExistingException("Favorite with locationname " + location.getName() + " and userId " + userId + " already exists.");
             }
         } else {
-            try {
                 location = locationService.createLocation(locationName);
-            } catch (EntityAlreadyExistingException e) {
-                log.error("Error while creating location.", e);
-            }
         }
         favorite.setLocation(location);
     }

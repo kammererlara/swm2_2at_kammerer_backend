@@ -330,4 +330,31 @@ class LocationServiceTests {
 
         assertThrows(EntityNotFoundException.class, () -> locationService.deleteLocation(1));
     }
+
+    @Test
+    void getLocationByName_success() {
+        final Location location = TestdataGenerator.generateLocationTestdata();
+
+        when(locationRepository.getLocationByName("Vienna")).thenReturn(Optional.of(location));
+
+        final Optional<Location> result = locationService.getLocationByName("Vienna");
+
+        assertEquals(location, result.get());
+    }
+
+    @Test
+    void getLocationByName_listEmpty() {
+        when(locationRepository.getLocationByName("Vienna")).thenReturn(Optional.empty());
+
+        final Optional<Location> result = locationService.getLocationByName("Vienna");
+
+        assertEquals(Optional.empty(), result);
+    }
+
+    @Test
+    void getLocationByName_databaseError() {
+        when(locationRepository.getLocationByName("Vienna")).thenThrow(new RuntimeException("Database error"));
+
+        assertThrows(RuntimeException.class, () -> locationService.getLocationByName("Vienna"));
+    }
 }
