@@ -37,7 +37,7 @@ class WeatherForecastControllerTests {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        favorite = TestdataGenerator.generateFavoriteTestdata();
+        favorite = TestdataGenerator.generateFavoriteTestdataWithId();
     }
 
     @Test

@@ -7,18 +7,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestdataGenerator {
-    public static User generateUserTestdata() {
+    public static User generateUserTestdataWithoutId() {
         final User user = new User();
-        user.setId(1);
         user.setFirstname("John");
         user.setLastname("Doe");
 
         return user;
     }
 
-    public static Location generateLocationTestdata() {
+    public static User generateUserTestdataWithId() {
+        final User user = generateUserTestdataWithoutId();
+        user.setId(1);
+        return user;
+    }
+
+    public static Location generateLocationTestdataWithoutId() {
         final Location location = new Location();
-        location.setId(1);
         location.setName("Vienna,Austria");
         location.setLatitude(48.208_49);
         location.setLongitude(16.372_08);
@@ -28,13 +32,24 @@ public class TestdataGenerator {
         return location;
     }
 
-    public static Favorite generateFavoriteTestdata() {
+    public static Location generateLocationTestdataWithId() {
+        final Location location = generateLocationTestdataWithoutId();
+        location.setId(1);
+        return location;
+    }
+
+    public static Favorite generateFavoriteTestdataWithoutId() {
         final Favorite favorite = new Favorite();
-        favorite.setId(1);
-        favorite.setLocation(generateLocationTestdata());
-        favorite.setUser(generateUserTestdata());
+        favorite.setLocation(generateLocationTestdataWithId());
+        favorite.setUser(generateUserTestdataWithId());
         favorite.setName("Home");
 
+        return favorite;
+    }
+
+    public static Favorite generateFavoriteTestdataWithId() {
+        final Favorite favorite = generateFavoriteTestdataWithoutId();
+        favorite.setId(1);
         return favorite;
     }
 
@@ -66,5 +81,14 @@ public class TestdataGenerator {
         weatherRecords.add(new WeatherRecord(LocalDateTime.of(2025, 2, 13, 23, 0), 2.9, 84));
 
         return weatherRecords;
+    }
+
+    public static User generateDefaultUserData() {
+        final User user = new User();
+        user.setId(0);
+        user.setFirstname("Jane");
+        user.setLastname("Doe");
+
+        return user;
     }
 }

@@ -35,7 +35,7 @@ class UserServiceTests {
 
     @Test
     void createUser_success() throws EntityAlreadyExistingException {
-        final User user = TestdataGenerator.generateUserTestdata();
+        final User user = TestdataGenerator.generateUserTestdataWithId();
 
         when(userRepository.getUserByFirstnameAndLastname(user.getFirstname(), user.getLastname())).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenReturn(user);
@@ -48,7 +48,7 @@ class UserServiceTests {
 
     @Test
     void createUser_alreadyExists() {
-        final User user = TestdataGenerator.generateUserTestdata();
+        final User user = TestdataGenerator.generateUserTestdataWithId();
 
         when(userRepository.getUserByFirstnameAndLastname(user.getFirstname(), user.getLastname())).thenReturn(Optional.of(user));
 
@@ -87,7 +87,7 @@ class UserServiceTests {
 
     @Test
     void createUser_databaseError() {
-        final User user = TestdataGenerator.generateUserTestdata();
+        final User user = TestdataGenerator.generateUserTestdataWithId();
 
         when(userRepository.getUserByFirstnameAndLastname(user.getFirstname(), user.getLastname())).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenThrow(new RuntimeException("Database error"));
@@ -98,7 +98,7 @@ class UserServiceTests {
 
     @Test
     void getUserById_success() throws EntityNotFoundException {
-        final User user = TestdataGenerator.generateUserTestdata();
+        final User user = TestdataGenerator.generateUserTestdataWithId();
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
         final User foundUser = userService.getUserById(user.getId());

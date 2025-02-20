@@ -38,12 +38,12 @@ class FavoriteServiceTests {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        favorite = TestdataGenerator.generateFavoriteTestdata();
+        favorite = TestdataGenerator.generateFavoriteTestdataWithId();
     }
 
     @Test
     void createFavorite_happyPath_userAndLocationAlreadyExisting() throws EntityNotFoundException, EntityAlreadyExistingException {
-        final Favorite favorite = TestdataGenerator.generateFavoriteTestdata();
+        final Favorite favorite = TestdataGenerator.generateFavoriteTestdataWithId();
 
         when(favoriteRepository.existsByNameAndUserId(favorite.getName(), favorite.getUser().getId())).thenReturn(false);
         when(userService.getUserById(favorite.getUser().getId())).thenReturn(favorite.getUser());
@@ -63,7 +63,7 @@ class FavoriteServiceTests {
 
     @Test
     void createFavorite_happyPath_locationNotExisting() throws EntityNotFoundException, EntityAlreadyExistingException {
-        final Favorite favorite = TestdataGenerator.generateFavoriteTestdata();
+        final Favorite favorite = TestdataGenerator.generateFavoriteTestdataWithId();
 
         when(favoriteRepository.existsByNameAndUserId(favorite.getName(), favorite.getUser().getId())).thenReturn(false);
         when(userService.getUserById(favorite.getUser().getId())).thenReturn(favorite.getUser());

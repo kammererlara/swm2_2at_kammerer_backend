@@ -38,9 +38,9 @@ class WeatherForecastServiceTests {
 
     @Test
     void getWeatherForecast_Success() throws EntityNotFoundException {
-        final Favorite favorite = TestdataGenerator.generateFavoriteTestdata();
+        final Favorite favorite = TestdataGenerator.generateFavoriteTestdataWithId();
 
-        final Location location = TestdataGenerator.generateLocationTestdata();
+        final Location location = TestdataGenerator.generateLocationTestdataWithId();
 
         when(locationService.getLocationById(1)).thenReturn(location);
         when(apiRequestService.retrieveWeatherForecast(location))
@@ -69,7 +69,7 @@ class WeatherForecastServiceTests {
 
     @Test
     void getWeatherForecast_locationIdNotExisting() throws EntityNotFoundException {
-        final Favorite favorite = TestdataGenerator.generateFavoriteTestdata();
+        final Favorite favorite = TestdataGenerator.generateFavoriteTestdataWithId();
 
         when(locationService.getLocationById(1)).thenThrow(new EntityNotFoundException("Location with id 1 not found."));
 
@@ -79,9 +79,9 @@ class WeatherForecastServiceTests {
 
     @Test
     void getWeatherForecast_openmeteoError() throws EntityNotFoundException {
-        final Favorite favorite = TestdataGenerator.generateFavoriteTestdata();
+        final Favorite favorite = TestdataGenerator.generateFavoriteTestdataWithId();
 
-        final Location location = TestdataGenerator.generateLocationTestdata();
+        final Location location = TestdataGenerator.generateLocationTestdataWithId();
 
         when(locationService.getLocationById(1)).thenReturn(location);
         when(apiRequestService.retrieveWeatherForecast(location))

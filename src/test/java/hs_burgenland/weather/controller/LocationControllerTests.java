@@ -33,7 +33,7 @@ class LocationControllerTests {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        location = TestdataGenerator.generateLocationTestdata();
+        location = TestdataGenerator.generateLocationTestdataWithId();
     }
 
     @Test
