@@ -1,21 +1,23 @@
 package hs_burgenland.weather.controller;
 
-import hs_burgenland.weather.TestdataGenerator;
-import hs_burgenland.weather.entities.Favorite;
+import hs_burgenland.weather.exceptions.EntityAlreadyExistingException;
+import hs_burgenland.weather.exceptions.EntityNotFoundException;
+import hs_burgenland.weather.repositories.FavoriteRepository;
+import hs_burgenland.weather.repositories.LocationRepository;
+import hs_burgenland.weather.repositories.UserRepository;
 import hs_burgenland.weather.services.FavoriteService;
+import jakarta.persistence.EntityManager;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.quality.Strictness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
-import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -23,42 +25,55 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@Transactional
 class FavoriteControllerDefaultUserIntegrationTests {
-    @Autowired
-    private FavoriteService favoriteService;
-
     @Autowired
     private MockMvc mvc;
 
-    private Favorite favorite;
+    @Autowired
+    private EntityManager entityManager;
 
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public FavoriteService favoriteService() {
-            return mock(FavoriteService.class, withSettings().strictness(Strictness.LENIENT));
-        }
-    }
+    @Autowired
+    private FavoriteRepository favoriteRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private LocationRepository locationRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private FavoriteService favoriteService;
 
     @BeforeEach
-    void setUp() {
-        reset(favoriteService);
-        favorite = TestdataGenerator.generateFavoriteTestdata();
+    void setUp() throws EntityAlreadyExistingException, EntityNotFoundException {
+        jdbcTemplate.execute("INSERT INTO users (id, firstname, lastname) VALUES (0, 'Jane', 'Doe')");
+        favoriteService.createFavorite("Graz", 0, "Home");
+    }
+
+    @AfterEach
+    void tearDown() {
+        jdbcTemplate.update("DELETE FROM favorite");
+        jdbcTemplate.execute("ALTER TABLE favorite ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.update("DELETE FROM location");
+        jdbcTemplate.execute("ALTER TABLE location ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.update("DELETE FROM users");
+        jdbcTemplate.execute("ALTER TABLE users ALTER COLUMN id RESTART WITH 1");
     }
 
     @Test
     void createFavorite_happyPath_defaultUser_UserIdNotGiven() throws Exception {
-        favorite.getUser().setId(0);
-        when(favoriteService.createFavorite("Vienna", favorite.getUser().getId(), favorite.getName()))
-                .thenReturn(favorite);
-
         mvc.perform(post("/favorites")
                         .contentType("application/json")
-                        .content("{\"location\":{\"name\":\"Vienna\"},\"user\":{\"firstname\":\"Jane\"},\"name\":\"Home\"}"))
+                        .content("{\"location\":{\"name\":\"Vienna\"},\"user\":{\"firstname\":\"Jane\"},\"name\":\"Favorite\"}"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"id\": 1, " +
+                .andExpect(content().json("{\"id\": 2, " +
                         "\"location\": " +
-                        "{\"id\": 1, " +
+                        "{\"id\": 2, " +
                         "\"name\": \"Vienna,Austria\", " +
                         "\"latitude\": 48.20849, " +
                         "\"longitude\": 16.37208, " +
@@ -66,26 +81,20 @@ class FavoriteControllerDefaultUserIntegrationTests {
                         "\"icao\": \"LOWW\"}, " +
                         "\"user\": " +
                         "{\"id\": 0, " +
-                        "\"firstname\": \"John\", " +
+                        "\"firstname\": \"Jane\", " +
                         "\"lastname\": \"Doe\"}, " +
-                        "\"name\": \"Home\"}"));
-        verify(favoriteService, times(1))
-                .createFavorite("Vienna", favorite.getUser().getId(), favorite.getName());
+                        "\"name\": \"Favorite\"}"));
     }
 
     @Test
     void createFavorite_defaultUser_UserNotGiven() throws Exception {
-        favorite.getUser().setId(0);
-        when(favoriteService.createFavorite("Vienna", favorite.getUser().getId(), favorite.getName()))
-                .thenReturn(favorite);
-
         mvc.perform(post("/favorites")
                         .contentType("application/json")
-                        .content("{\"location\":{\"name\":\"Vienna\"},\"name\":\"Home\"}"))
+                        .content("{\"location\":{\"name\":\"Vienna\"},\"name\":\"Favorite\"}"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"id\": 1, " +
+                .andExpect(content().json("{\"id\": 2, " +
                         "\"location\": " +
-                        "{\"id\": 1, " +
+                        "{\"id\": 2, " +
                         "\"name\": \"Vienna,Austria\", " +
                         "\"latitude\": 48.20849, " +
                         "\"longitude\": 16.37208, " +
@@ -93,26 +102,17 @@ class FavoriteControllerDefaultUserIntegrationTests {
                         "\"icao\": \"LOWW\"}, " +
                         "\"user\": " +
                         "{\"id\": 0, " +
-                        "\"firstname\": \"John\", " +
+                        "\"firstname\": \"Jane\", " +
                         "\"lastname\": \"Doe\"}, " +
-                        "\"name\": \"Home\"}"));
-        verify(favoriteService, times(1))
-                .createFavorite("Vienna", favorite.getUser().getId(), favorite.getName());
+                        "\"name\": \"Favorite\"}"));
     }
 
     @Test
     void getFavoritesByUserId_happyPath_defaultUser() throws Exception {
-        favorite.getUser().setId(0);
-        when(favoriteService.getFavoritesByUserId(0)).thenReturn(List.of(favorite, favorite));
-
         mvc.perform(get("/favorites/user/0"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("[{\"id\":1,\"user\":{\"id\":0,\"firstname\":\"John\"," +
-                        "\"lastname\":\"Doe\"},\"name\":\"Home\",\"location\":{\"id\":1,\"latitude\":48.20849," +
-                        "\"longitude\":16.37208,\"elevation\":171.0,\"name\":\"Vienna,Austria\",\"icao\":\"LOWW\"}}," +
-                        "{\"id\":1,\"user\":{\"id\":0,\"firstname\":\"John\",\"lastname\":\"Doe\"},\"name\":\"Home\"," +
-                        "\"location\":{\"id\":1,\"latitude\":48.20849,\"longitude\":16.37208,\"elevation\":171.0," +
-                        "\"name\":\"Vienna,Austria\",\"icao\":\"LOWW\"}}]"));
-        verify(favoriteService, times(1)).getFavoritesByUserId(0);
+                .andExpect(content().json("[{\"id\":1,\"user\":{\"id\":0,\"firstname\":\"Jane\"," +
+                        "\"lastname\":\"Doe\"},\"name\":\"Home\",\"location\":{\"id\":1,\"latitude\":47.06667," +
+                        "\"longitude\":15.45,\"elevation\":363.0,\"name\":\"Graz,Austria\",\"icao\":\"LOWG\"}}]"));
     }
 }

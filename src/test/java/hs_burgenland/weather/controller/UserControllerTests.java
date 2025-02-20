@@ -32,7 +32,7 @@ class UserControllerTests {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        user = TestdataGenerator.generateUserTestdata();
+        user = TestdataGenerator.generateUserTestdataWithId();
     }
 
     @Test

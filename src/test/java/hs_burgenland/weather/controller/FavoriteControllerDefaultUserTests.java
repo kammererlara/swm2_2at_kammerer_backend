@@ -32,14 +32,14 @@ class FavoriteControllerDefaultUserTests {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        favorite = TestdataGenerator.generateFavoriteTestdata();
+        favorite = TestdataGenerator.generateFavoriteTestdataWithId();
     }
 
     @Test
     void createFavorite_happyPath_defaultUser() throws EntityAlreadyExistingException, EntityNotFoundException {
         favorite.getUser().setId(0);
 
-        final Favorite inputFavorite = TestdataGenerator.generateFavoriteTestdata();
+        final Favorite inputFavorite = TestdataGenerator.generateFavoriteTestdataWithId();
         inputFavorite.setUser(null);
 
         when(favoriteService.createFavorite(

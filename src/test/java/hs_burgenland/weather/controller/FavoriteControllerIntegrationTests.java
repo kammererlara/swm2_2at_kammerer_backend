@@ -1,24 +1,18 @@
 package hs_burgenland.weather.controller;
 
-import com.sun.jdi.InternalException;
-import hs_burgenland.weather.TestdataGenerator;
-import hs_burgenland.weather.entities.Favorite;
 import hs_burgenland.weather.exceptions.EntityAlreadyExistingException;
 import hs_burgenland.weather.exceptions.EntityNotFoundException;
 import hs_burgenland.weather.services.FavoriteService;
+import hs_burgenland.weather.services.UserService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.quality.Strictness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
-
-import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,35 +26,37 @@ class FavoriteControllerIntegrationTests {
     @Autowired
     private MockMvc mvc;
 
-    private Favorite favorite;
+    @Autowired
+    private UserService userService;
 
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public FavoriteService favoriteService() {
-            return mock(FavoriteService.class, withSettings().strictness(Strictness.LENIENT));
-        }
-    }
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
-    void setUp() {
-        reset(favoriteService);
+    void setUp() throws EntityAlreadyExistingException, EntityNotFoundException {
+        userService.createUser("John", "Doe");
+        favoriteService.createFavorite("Graz", 1, "Favorite");
+    }
 
-        favorite = TestdataGenerator.generateFavoriteTestdata();
+    @AfterEach
+    void tearDown() {
+        jdbcTemplate.update("DELETE FROM favorite");
+        jdbcTemplate.execute("ALTER TABLE favorite ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.update("DELETE FROM location");
+        jdbcTemplate.execute("ALTER TABLE location ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.update("DELETE FROM users");
+        jdbcTemplate.execute("ALTER TABLE users ALTER COLUMN id RESTART WITH 1");
     }
 
     @Test
     void createFavorite_happyPath() throws Exception {
-        when(favoriteService.createFavorite("Vienna", favorite.getUser().getId(), favorite.getName()))
-                .thenReturn(favorite);
-
         mvc.perform(post("/favorites")
                 .contentType("application/json")
                 .content("{\"location\":{\"name\":\"Vienna\"},\"user\":{\"id\":1},\"name\":\"Home\"}"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"id\": 1, " +
+                .andExpect(content().json("{\"id\": 2, " +
                         "\"location\": " +
-                        "{\"id\": 1, " +
+                        "{\"id\": 2, " +
                         "\"name\": \"Vienna,Austria\", " +
                         "\"latitude\": 48.20849, " +
                         "\"longitude\": 16.37208, " +
@@ -71,20 +67,15 @@ class FavoriteControllerIntegrationTests {
                         "\"firstname\": \"John\", " +
                         "\"lastname\": \"Doe\"}, " +
                         "\"name\": \"Home\"}"));
-        verify(favoriteService, times(1)).createFavorite("Vienna", favorite.getUser().getId(), favorite.getName());
     }
 
     @Test
     void createFavorite_wrongLocationInput() throws Exception {
-        when(favoriteService.createFavorite("jhsdbfjkhabc", favorite.getUser().getId(), favorite.getName()))
-                .thenThrow(new InternalException("Error while processing location data. No results found."));
-
         mvc.perform(post("/favorites")
                         .contentType("application/json")
                         .content("{\"location\":{\"name\":\"jhsdbfjkhabc\"},\"user\":{\"id\":1},\"name\": \"Home\"}"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().string("Error while processing location data. No results found."));
-        verify(favoriteService, times(1)).createFavorite("jhsdbfjkhabc", favorite.getUser().getId(), favorite.getName());
     }
 
     @Test
@@ -98,40 +89,29 @@ class FavoriteControllerIntegrationTests {
 
     @Test
     void createFavorite_notExistingUser() throws Exception {
-        when(favoriteService.createFavorite("Vienna", 99, favorite.getName()))
-                .thenThrow(new EntityNotFoundException("User with id 99 not found."));
-
         mvc.perform(post("/favorites")
                         .contentType("application/json")
                         .content("{\"location\":{\"name\":\"Vienna\"},\"user\":{\"id\":99},\"name\":\"Home\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("User with id 99 not found."));
-        verify(favoriteService, times(1)).createFavorite("Vienna", 99, favorite.getName());
     }
 
     @Test
     void createFavorite_existingFavoriteName() throws Exception {
-        when(favoriteService.createFavorite("Vienna", favorite.getUser().getId(), favorite.getName()))
-                .thenThrow(new EntityAlreadyExistingException("Location with name Home is already a favorite location."));
-
         mvc.perform(post("/favorites")
                         .contentType("application/json")
-                        .content("{\"location\":{\"name\":\"Vienna\"},\"user\":{\"id\": 1},\"name\":\"Home\"}"))
+                        .content("{\"location\":{\"name\":\"Vienna\"},\"user\":{\"id\": 1},\"name\":\"Favorite\"}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Location with name Home is already a favorite location."));
+                .andExpect(content().string("Location with name Favorite is already a favorite location."));
     }
 
     @Test
     void createFavorite_existingFavoriteWithUserIdAndLocationCombination() throws Exception {
-        when(favoriteService.createFavorite("Vienna", favorite.getUser().getId(), favorite.getName()))
-                .thenThrow(new EntityAlreadyExistingException("Favorite with locationname Vienna and userId 1 already exists."));
-
         mvc.perform(post("/favorites")
                         .contentType("application/json")
-                        .content("{\"location\":{\"name\":\"Vienna\"},\"user\":{\"id\": 1},\"name\":\"Home\"}"))
+                        .content("{\"location\":{\"name\":\"Graz\"},\"user\":{\"id\": 1},\"name\":\"Home\"}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Favorite with locationname Vienna and userId 1 already exists."));
-        verify(favoriteService, times(1)).createFavorite("Vienna", favorite.getUser().getId(), favorite.getName());
+                .andExpect(content().string("Location Graz,Austria does already exist."));
     }
 
     @Test
@@ -144,37 +124,18 @@ class FavoriteControllerIntegrationTests {
     }
 
     @Test
-    void createFavorite_ServerError() throws Exception {
-        when(favoriteService.createFavorite("Vienna", favorite.getUser().getId(), favorite.getName()))
-                .thenThrow(new RuntimeException("Server Error"));
-
-        mvc.perform(post("/favorites")
-                        .contentType("application/json")
-                        .content("{\"location\":{\"name\":\"Vienna\"},\"user\":{\"id\":1},\"name\":\"Home\"}"))
-                .andExpect(status().isInternalServerError())
-                .andExpect(content().string("Server Error"));
-        verify(favoriteService, times(1)).createFavorite("Vienna", favorite.getUser().getId(), favorite.getName());
-    }
-
-    @Test
     void getAllFavorites_happyPath() throws Exception {
-        when(favoriteService.getAllFavorites()).thenReturn(List.of(favorite, favorite));
-
         mvc.perform(get("/favorites"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("[{\"id\":1,\"user\":{\"id\":1,\"firstname\":\"John\"," +
-                        "\"lastname\":\"Doe\"},\"name\":\"Home\",\"location\":{\"id\":1,\"latitude\":48.20849," +
-                        "\"longitude\":16.37208,\"elevation\":171.0,\"name\":\"Vienna,Austria\",\"icao\":\"LOWW\"}}," +
-                        "{\"id\":1,\"user\":{\"id\":1,\"firstname\":\"John\",\"lastname\":\"Doe\"},\"name\":\"Home\"," +
-                        "\"location\":{\"id\":1,\"latitude\":48.20849,\"longitude\":16.37208,\"elevation\":171.0," +
-                        "\"name\":\"Vienna,Austria\",\"icao\":\"LOWW\"}}]"));
-        verify(favoriteService, times(1)).getAllFavorites();
+                .andExpect(content()
+                        .json("[{\"id\":1,\"user\":{\"id\":1,\"firstname\":\"John\",\"lastname\":\"Doe\"}," +
+                                "\"name\":\"Favorite\",\"location\":{\"id\":1,\"latitude\":47.06667," +
+                                "\"longitude\":15.45,\"elevation\":363.0,\"name\":\"Graz,Austria\",\"icao\":\"LOWG\"}}]"));
     }
 
     @Test
     void getAllFavorites_emptyList() throws Exception {
-        when(favoriteService.getAllFavorites()).thenReturn(List.of());
-
+        favoriteService.deleteFavorite(1);
         mvc.perform(get("/favorites"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
@@ -182,27 +143,18 @@ class FavoriteControllerIntegrationTests {
 
     @Test
     void getFavoritesByUserId_happyPath() throws Exception {
-        when(favoriteService.getFavoritesByUserId(1)).thenReturn(List.of(favorite, favorite));
-
         mvc.perform(get("/favorites/user/1"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("[{\"id\":1,\"user\":{\"id\":1,\"firstname\":\"John\"," +
-                        "\"lastname\":\"Doe\"},\"name\":\"Home\",\"location\":{\"id\":1,\"latitude\":48.20849," +
-                        "\"longitude\":16.37208,\"elevation\":171.0,\"name\":\"Vienna,Austria\",\"icao\":\"LOWW\"}}," +
-                        "{\"id\":1,\"user\":{\"id\":1,\"firstname\":\"John\",\"lastname\":\"Doe\"},\"name\":\"Home\"," +
-                        "\"location\":{\"id\":1,\"latitude\":48.20849,\"longitude\":16.37208,\"elevation\":171.0," +
-                        "\"name\":\"Vienna,Austria\",\"icao\":\"LOWW\"}}]"));
-        verify(favoriteService, times(1)).getFavoritesByUserId(1);
+                .andExpect(content()
+                        .json("[{\"id\":1,\"user\":{\"id\":1,\"firstname\":\"John\",\"lastname\":\"Doe\"}," +
+                        "\"name\":\"Favorite\",\"location\":{\"id\":1,\"latitude\":47.06667,\"longitude\":15.45," +
+                        "\"elevation\":363.0,\"name\":\"Graz,Austria\",\"icao\":\"LOWG\"}}]"));
     }
 
     @Test
     void getFavoritesByUserId_notExisting() throws Exception {
-        when(favoriteService.getFavoritesByUserId(99))
-                .thenThrow(new EntityNotFoundException("User with id 99 not found."));
-
         mvc.perform(get("/favorites/user/99"))
                 .andExpect(status().isNotFound());
-        verify(favoriteService, times(1)).getFavoritesByUserId(99);
     }
 
     @Test
@@ -220,23 +172,17 @@ class FavoriteControllerIntegrationTests {
 
     @Test
     void getFavoriteById_happyPath() throws Exception {
-        when(favoriteService.getFavoriteById(1)).thenReturn(favorite);
-
         mvc.perform(get("/favorites/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"id\":1,\"user\":{\"id\":1,\"firstname\":\"John\"," +
-                        "\"lastname\":\"Doe\"},\"name\":\"Home\",\"location\":{\"id\":1,\"latitude\":48.20849," +
-                        "\"longitude\":16.37208,\"elevation\":171.0,\"name\":\"Vienna,Austria\",\"icao\":\"LOWW\"}}"));
-        verify(favoriteService, times(1)).getFavoriteById(1);
+                        "\"lastname\":\"Doe\"},\"name\":\"Favorite\",\"location\":{\"id\":1,\"latitude\":47.06667," +
+                        "\"longitude\":15.45,\"elevation\":363.0,\"name\":\"Graz,Austria\",\"icao\":\"LOWG\"}}"));
     }
 
     @Test
     void getFavoriteById_notExisting() throws Exception {
-        when(favoriteService.getFavoriteById(99)).thenThrow(new EntityNotFoundException("Favorite not found"));
-
         mvc.perform(get("/favorites/99"))
                 .andExpect(status().isNotFound());
-        verify(favoriteService, times(1)).getFavoriteById(99);
     }
 
     @Test
@@ -254,20 +200,14 @@ class FavoriteControllerIntegrationTests {
 
     @Test
     void deleteFavorite_happyPath() throws Exception {
-        doNothing().when(favoriteService).deleteFavorite(1);
-
         mvc.perform(delete("/favorites/1"))
                 .andExpect(status().isNoContent());
-        verify(favoriteService, times(1)).deleteFavorite(1);
     }
 
     @Test
     void deleteFavorite_notExisting() throws Exception {
-        doThrow(new EntityNotFoundException("Favorite with id 99 not found.")).when(favoriteService).deleteFavorite(99);
-
         mvc.perform(delete("/favorites/99"))
                 .andExpect(status().isNotFound());
-        verify(favoriteService, times(1)).deleteFavorite(99);
     }
 
     @Test

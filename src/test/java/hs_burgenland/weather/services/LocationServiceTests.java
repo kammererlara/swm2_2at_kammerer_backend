@@ -62,7 +62,7 @@ class LocationServiceTests {
                 "\"state\":\"9\",\"type\":\"large_airport\",\"website\":\"http://www.viennaairport.com/en/\"," +
                 "\"wiki\":\"https://en.wikipedia.org/wiki/Vienna_International_Airport\"}}]\n");
 
-        final Location expectedLocation = TestdataGenerator.generateLocationTestdata();
+        final Location expectedLocation = TestdataGenerator.generateLocationTestdataWithId();
 
         locationService.createLocation("Vienna");
 
@@ -89,7 +89,7 @@ class LocationServiceTests {
                 "\"1190\",\"1200\",\"1210\",\"1220\",\"1230\"],\"country_id\":2782113,\"country\":\"Austria\"," +
                 "\"admin1\":\"Vienna\",\"admin2\":\"Vienna\"}],\"generationtime_ms\":1.2409687}");
 
-        final Location location = TestdataGenerator.generateLocationTestdata();
+        final Location location = TestdataGenerator.generateLocationTestdataWithId();
         when(locationRepository.getLocationByLatitudeAndLongitude(48.208_49, 16.372_08))
                 .thenReturn(Optional.of(location));
 
@@ -299,7 +299,7 @@ class LocationServiceTests {
 
     @Test
     void getLocationById_entryFound() throws EntityNotFoundException {
-        final Location location = TestdataGenerator.generateLocationTestdata();
+        final Location location = TestdataGenerator.generateLocationTestdataWithId();
 
         when(locationRepository.findById(1)).thenReturn(Optional.of(location));
 
@@ -333,7 +333,7 @@ class LocationServiceTests {
 
     @Test
     void getLocationByName_success() {
-        final Location location = TestdataGenerator.generateLocationTestdata();
+        final Location location = TestdataGenerator.generateLocationTestdataWithId();
 
         when(locationRepository.getLocationByName("Vienna")).thenReturn(Optional.of(location));
 
