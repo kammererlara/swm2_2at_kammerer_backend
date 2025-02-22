@@ -37,7 +37,7 @@ class FavoriteControllerDefaultUserTests {
 
     @Test
     void createFavorite_happyPath_defaultUser() throws EntityAlreadyExistingException, EntityNotFoundException {
-        favorite.getUser().setId(0);
+        favorite.getUser().setId(1);
 
         final Favorite inputFavorite = TestdataGenerator.generateFavoriteTestdataWithId();
         inputFavorite.setUser(null);
@@ -50,15 +50,15 @@ class FavoriteControllerDefaultUserTests {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(favorite, Objects.requireNonNull(response.getBody()));
         verify(favoriteService, times(1))
-                .createFavorite(favorite.getLocation().getName(), 0, favorite.getName());
+                .createFavorite(favorite.getLocation().getName(), 1, favorite.getName());
     }
 
     @Test
     void getFavoritesByUserId_defaultUser() throws EntityNotFoundException {
         final List<Favorite> favorites = List.of(favorite, new Favorite());
-        when(favoriteService.getFavoritesByUserId(0)).thenReturn(favorites);
+        when(favoriteService.getFavoritesByUserId(1)).thenReturn(favorites);
 
-        final ResponseEntity<?> response = favoriteController.getFavoritesByUserId(0);
+        final ResponseEntity<?> response = favoriteController.getFavoritesByUserId(1);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(favorites, response.getBody());

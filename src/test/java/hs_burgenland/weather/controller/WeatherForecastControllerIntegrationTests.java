@@ -1,11 +1,9 @@
 package hs_burgenland.weather.controller;
 
-import hs_burgenland.weather.entities.*;
 import hs_burgenland.weather.exceptions.EntityAlreadyExistingException;
 import hs_burgenland.weather.exceptions.EntityNotFoundException;
 import hs_burgenland.weather.services.FavoriteService;
 import hs_burgenland.weather.services.UserService;
-import hs_burgenland.weather.services.WeatherForecastService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,9 +24,6 @@ class WeatherForecastControllerIntegrationTests {
     private FavoriteService favoriteService;
 
     @Autowired
-    private WeatherForecastService weatherForecastService;
-
-    @Autowired
     private MockMvc mvc;
 
     @Autowired
@@ -36,8 +31,6 @@ class WeatherForecastControllerIntegrationTests {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
-    private Favorite favorite;
 
     @BeforeEach
     void setUp() throws EntityAlreadyExistingException, EntityNotFoundException {
@@ -64,7 +57,7 @@ class WeatherForecastControllerIntegrationTests {
 
     @Test
     void getWeatherForecastAtFavoriteLocation_wrongIput() throws Exception {
-        mvc.perform(get("/weather/-1")
+        mvc.perform(get("/weather/0")
                         .contentType("application/json"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Favorite id must be greater than 0."));

@@ -84,7 +84,7 @@ class FavoriteControllerIntegrationTests {
                         .contentType("application/json")
                         .content("{\"location\":{\"name\":\"Vienna\"},\"user\":{\"id\":-1},\"name\":\"Home\"}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("User id must be at least 0."));
+                .andExpect(content().string("User id must be greater than 0."));
     }
 
     @Test
@@ -159,9 +159,9 @@ class FavoriteControllerIntegrationTests {
 
     @Test
     void getFavoritesByUserId_wrongInputNumber() throws Exception {
-        mvc.perform(get("/favorites/user/-1"))
+        mvc.perform(get("/favorites/user/0"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("User id must be at least 0."));
+                .andExpect(content().string("User id must be greater than 0."));
     }
 
     @Test
@@ -187,7 +187,7 @@ class FavoriteControllerIntegrationTests {
 
     @Test
     void getFavoriteById_wrongInputNumber() throws Exception {
-        mvc.perform(get("/favorites/-1"))
+        mvc.perform(get("/favorites/0"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Favorite id must be greater than 0."));
     }
@@ -212,7 +212,7 @@ class FavoriteControllerIntegrationTests {
 
     @Test
     void deleteFavorite_wrongInputNumber() throws Exception {
-        mvc.perform(delete("/favorites/-1"))
+        mvc.perform(delete("/favorites/0"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Favorite id must be greater than 0."));
     }

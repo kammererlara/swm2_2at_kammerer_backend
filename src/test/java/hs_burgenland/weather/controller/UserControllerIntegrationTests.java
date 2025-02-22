@@ -29,7 +29,7 @@ class UserControllerIntegrationTests {
 
     @BeforeEach
     void setUp() throws EntityAlreadyExistingException {
-        jdbcTemplate.execute("INSERT INTO users (id, firstname, lastname) VALUES (0, 'Jane', 'Doe')");
+        userService.createUser("Jane", "Doe");
     }
 
     @AfterEach
@@ -44,7 +44,7 @@ class UserControllerIntegrationTests {
                 .contentType("application/json")
                 .content("{\"firstname\": \"Max\", \"lastname\": \"Muster\"}"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"id\": 1, \"firstname\": \"Max\", \"lastname\": \"Muster\"}"));
+                .andExpect(content().json("{\"id\": 2, \"firstname\": \"Max\", \"lastname\": \"Muster\"}"));
     }
 
     @Test
@@ -58,13 +58,11 @@ class UserControllerIntegrationTests {
 
     @Test
     void createUser_existingUser() throws Exception {
-        userService.createUser("John", "Doe");
-
         mvc.perform(post("/users")
                 .contentType("application/json")
-                .content("{\"firstname\": \"John\", \"lastname\": \"Doe\"}"))
+                .content("{\"firstname\": \"Jane\", \"lastname\": \"Doe\"}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("User John Doe does already exist on this bank."));
+                .andExpect(content().string("User Jane Doe does already exist on this bank."));
     }
 
     @Test
@@ -83,14 +81,14 @@ class UserControllerIntegrationTests {
 
         mvc.perform(get("/users"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("[{\"id\":0,\"firstname\":\"Jane\",\"lastname\":\"Doe\"}," +
-                        "{\"id\":1,\"firstname\":\"John\",\"lastname\":\"Doe\"}," +
-                        "{\"id\":2,\"firstname\":\"Max\",\"lastname\":\"Muster\"}]"));
+                .andExpect(content().json("[{\"id\":1,\"firstname\":\"Jane\",\"lastname\":\"Doe\"}," +
+                        "{\"id\":2,\"firstname\":\"John\",\"lastname\":\"Doe\"}," +
+                        "{\"id\":3,\"firstname\":\"Max\",\"lastname\":\"Muster\"}]"));
     }
 
     @Test
     void getAllUsers_emptyList() throws Exception {
-        jdbcTemplate.update("DELETE FROM users WHERE id = 0");
+        jdbcTemplate.update("DELETE FROM users WHERE id = 1");
         mvc.perform(get("/users"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
@@ -100,9 +98,9 @@ class UserControllerIntegrationTests {
     void getUserById_happyPath() throws Exception {
         userService.createUser("John", "Doe");
 
-        mvc.perform(get("/users/1"))
+        mvc.perform(get("/users/2"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"id\": 1, \"firstname\": \"John\", \"lastname\": \"Doe\"}"));
+                .andExpect(content().json("{\"id\": 2, \"firstname\": \"John\", \"lastname\": \"Doe\"}"));
     }
 
     @Test
@@ -113,9 +111,9 @@ class UserControllerIntegrationTests {
 
     @Test
     void getUserById_wrongInputNumber() throws Exception {
-        mvc.perform(get("/users/-1"))
+        mvc.perform(get("/users/0"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("User id must be at least 0."));
+                .andExpect(content().string("User id must be greater than 0."));
     }
 
     @Test
@@ -126,16 +124,16 @@ class UserControllerIntegrationTests {
 
     @Test
     void getUserById_happyPath_defaultUser() throws Exception {
-        mvc.perform(get("/users/0"))
+        mvc.perform(get("/users/1"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"id\": 0, \"firstname\": \"Jane\", \"lastname\": \"Doe\"}"));
+                .andExpect(content().json("{\"id\": 1, \"firstname\": \"Jane\", \"lastname\": \"Doe\"}"));
     }
 
     @Test
     void deleteUser_happyPath() throws Exception {
         userService.createUser("John", "Doe");
 
-        mvc.perform(delete("/users/1"))
+        mvc.perform(delete("/users/2"))
                 .andExpect(status().isNoContent());
     }
 
@@ -147,9 +145,9 @@ class UserControllerIntegrationTests {
 
     @Test
     void deleteUser_wrongInputNumber() throws Exception {
-        mvc.perform(delete("/users/-1"))
+        mvc.perform(delete("/users/0"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("User id must be greater than 0."));
+                .andExpect(content().string("User id must be greater than 1."));
     }
 
     @Test
@@ -160,8 +158,8 @@ class UserControllerIntegrationTests {
 
     @Test
     void deleteUser_defaultUser() throws Exception {
-        mvc.perform(delete("/users/0"))
+        mvc.perform(delete("/users/1"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("User id must be greater than 0."));
+                .andExpect(content().string("User id must be greater than 1."));
     }
 }

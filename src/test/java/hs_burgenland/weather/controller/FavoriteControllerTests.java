@@ -90,7 +90,7 @@ class FavoriteControllerTests {
         final ResponseEntity<?> response = favoriteController.createFavorite(favorite);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("User id must be at least 0.", response.getBody());
+        assertEquals("User id must be greater than 0.", response.getBody());
     }
 
     @Test
@@ -183,10 +183,10 @@ class FavoriteControllerTests {
 
     @Test
     void getFavoritesByUserId_wrongInput() {
-        final ResponseEntity<?> response = favoriteController.getFavoritesByUserId(-1);
+        final ResponseEntity<?> response = favoriteController.getFavoritesByUserId(0);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("User id must be at least 0.", response.getBody());
+        assertEquals("User id must be greater than 0.", response.getBody());
     }
 
     @Test

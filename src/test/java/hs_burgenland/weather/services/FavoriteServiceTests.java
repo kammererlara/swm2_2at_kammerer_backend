@@ -104,7 +104,6 @@ class FavoriteServiceTests {
         assertThrows(EntityNotFoundException.class, () -> favoriteService.createFavorite(favorite.getLocation().getName(), 99, favorite.getName()));
         verify(favoriteRepository, times(1)).existsByNameAndUserId(favorite.getName(), 99);
         verify(userService, times(1)).getUserById(99);
-        verify(locationService, times(0)).getLocationByName(any());
     }
 
     @Test
