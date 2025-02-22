@@ -39,8 +39,8 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable final int id) {
-        if (id < 0) {
-            return ResponseEntity.badRequest().body("User id must be at least 0.");
+        if (id <= 0) {
+            return ResponseEntity.badRequest().body("User id must be greater than 0.");
         }
 
         try {
@@ -54,9 +54,9 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable final int id) {
-        if (id <= 0) {
+        if (id <= 1) {
             // I want to prevent my default user from being deleted
-            return ResponseEntity.badRequest().body("User id must be greater than 0.");
+            return ResponseEntity.badRequest().body("User id must be greater than 1.");
         }
 
         try {

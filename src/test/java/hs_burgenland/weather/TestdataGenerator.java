@@ -17,7 +17,7 @@ public class TestdataGenerator {
 
     public static User generateUserTestdataWithId() {
         final User user = generateUserTestdataWithoutId();
-        user.setId(1);
+        user.setId(2);
         return user;
     }
 

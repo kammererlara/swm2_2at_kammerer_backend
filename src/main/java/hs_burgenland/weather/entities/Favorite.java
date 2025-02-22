@@ -16,11 +16,11 @@ public class Favorite {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
     @Column(nullable = false)
     private String name;
     @ManyToOne
-    @JoinColumn(name = "locationId", nullable = false)
+    @JoinColumn(name = "location_id", nullable = false)
     private Location location;
 }

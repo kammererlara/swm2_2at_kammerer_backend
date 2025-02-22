@@ -130,10 +130,10 @@ class UserControllerTests {
 
     @Test
     void getUserById_wrongInputNumber() {
-        final ResponseEntity<?> response = userController.getUserById(-1);
+        final ResponseEntity<?> response = userController.getUserById(0);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("User id must be at least 0.", response.getBody());
+        assertEquals("User id must be greater than 0.", response.getBody());
     }
 
     @Test
@@ -148,10 +148,10 @@ class UserControllerTests {
 
     @Test
     void getUserById_defaultUser() throws EntityNotFoundException {
-        user.setId(0);
-        when(userService.getUserById(0)).thenReturn(user);
+        user.setId(1);
+        when(userService.getUserById(1)).thenReturn(user);
 
-        final ResponseEntity<?> response = userController.getUserById(0);
+        final ResponseEntity<?> response = userController.getUserById(1);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(user, response.getBody());
@@ -159,18 +159,18 @@ class UserControllerTests {
 
     @Test
     void getUserById_defaultUser_notExisting() throws EntityNotFoundException {
-        when(userService.getUserById(0)).thenThrow(new EntityNotFoundException("User with id 0 not found."));
+        when(userService.getUserById(1)).thenThrow(new EntityNotFoundException("User with id 1 not found."));
 
-        final ResponseEntity<?> response = userController.getUserById(0);
+        final ResponseEntity<?> response = userController.getUserById(1);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
     @Test
     void deleteUser_success() throws EntityNotFoundException {
-        doNothing().when(userService).deleteUser(1);
+        doNothing().when(userService).deleteUser(2);
 
-        final ResponseEntity<?> response = userController.deleteUser(1);
+        final ResponseEntity<?> response = userController.deleteUser(2);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertNull(response.getBody());
@@ -178,26 +178,26 @@ class UserControllerTests {
 
     @Test
     void deleteUser_notFound() throws EntityNotFoundException {
-        doThrow(new EntityNotFoundException("User with id 1 not found.")).when(userService).deleteUser(1);
+        doThrow(new EntityNotFoundException("User with id 2 not found.")).when(userService).deleteUser(2);
 
-        final ResponseEntity<?> response = userController.deleteUser(1);
+        final ResponseEntity<?> response = userController.deleteUser(2);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
     @Test
     void deleteUser_wrongInputNumber() {
-        final ResponseEntity<?> response = userController.deleteUser(-1);
+        final ResponseEntity<?> response = userController.deleteUser(0);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("User id must be greater than 0.", response.getBody());
+        assertEquals("User id must be greater than 1.", response.getBody());
     }
 
     @Test
     void deleteUser_serverError() throws EntityNotFoundException {
-        doThrow(new RuntimeException("Unexpected error")).when(userService).deleteUser(1);
+        doThrow(new RuntimeException("Unexpected error")).when(userService).deleteUser(2);
 
-        final ResponseEntity<?> response = userController.deleteUser(1);
+        final ResponseEntity<?> response = userController.deleteUser(2);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals("Unexpected error", response.getBody());
@@ -205,7 +205,7 @@ class UserControllerTests {
 
     @Test
     void deleteUser_defaultUser() throws EntityNotFoundException {
-        final ResponseEntity<?> response = userController.deleteUser(0);
+        final ResponseEntity<?> response = userController.deleteUser(1);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }

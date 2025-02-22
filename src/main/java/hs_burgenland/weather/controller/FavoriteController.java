@@ -15,7 +15,7 @@ public class FavoriteController {
     @Autowired
     private FavoriteService favoriteService;
 
-//    DefaultUser: id = 0
+//    DefaultUser: id = 1
     @PostMapping
     public ResponseEntity<?> createFavorite(@RequestBody final Favorite favorite) {
         if (favorite.getName() == null || favorite.getName().isEmpty()
@@ -23,14 +23,14 @@ public class FavoriteController {
             return ResponseEntity.badRequest().body("Name and location must be provided.");
         }
 
-        if (favorite.getUser() == null) {
+        if (favorite.getUser() == null || favorite.getUser().getId() == 0) {
             final User user = new User();
-            user.setId(0);
+            user.setId(1);
             favorite.setUser(user);
         }
 
-        if (favorite.getUser().getId() < 0) {
-            return ResponseEntity.badRequest().body("User id must be at least 0.");
+        if (favorite.getUser().getId() <= 0) {
+            return ResponseEntity.badRequest().body("User id must be greater than 0.");
         }
 
         try {
@@ -53,8 +53,8 @@ public class FavoriteController {
 
     @GetMapping("/user/{id}")
     public ResponseEntity<?> getFavoritesByUserId(@PathVariable final int id) {
-        if (id < 0) {
-            return ResponseEntity.badRequest().body("User id must be at least 0.");
+        if (id <= 0) {
+            return ResponseEntity.badRequest().body("User id must be greater than 0.");
         }
 
         try {
