@@ -335,7 +335,7 @@ class LocationServiceTests {
     void getLocationByName_success() {
         final Location location = TestdataGenerator.generateLocationTestdataWithId();
 
-        when(locationRepository.getLocationByName("Vienna")).thenReturn(Optional.of(location));
+        when(locationRepository.findByNameContaining("Vienna")).thenReturn(List.of(location));
 
         final Optional<Location> result = locationService.getLocationByName("Vienna");
 
@@ -344,7 +344,7 @@ class LocationServiceTests {
 
     @Test
     void getLocationByName_listEmpty() {
-        when(locationRepository.getLocationByName("Vienna")).thenReturn(Optional.empty());
+        when(locationRepository.findByNameContaining("Vienna")).thenReturn(List.of());
 
         final Optional<Location> result = locationService.getLocationByName("Vienna");
 
@@ -353,7 +353,7 @@ class LocationServiceTests {
 
     @Test
     void getLocationByName_databaseError() {
-        when(locationRepository.getLocationByName("Vienna")).thenThrow(new RuntimeException("Database error"));
+        when(locationRepository.findByNameContaining("Vienna")).thenThrow(new RuntimeException("Database error"));
 
         assertThrows(RuntimeException.class, () -> locationService.getLocationByName("Vienna"));
     }
