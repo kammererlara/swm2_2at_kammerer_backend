@@ -71,7 +71,7 @@ public class FavoriteService {
     }
 
     private void setFavoriteLocation(final String locationName, final int userId, final Favorite favorite) throws EntityAlreadyExistingException {
-        final Optional<Location> locationResult = locationService.getLocationByName(locationName);
+        final Optional<Location> locationResult = locationService.getLocationByName(locationName.trim());
         final Location location;
         if (locationResult.isPresent()) {
             location = locationResult.get();

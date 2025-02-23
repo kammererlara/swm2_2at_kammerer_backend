@@ -45,6 +45,12 @@ public class LocationService {
         }
     }
 
+    private void assertLocationDoesNotExist(final Location location) throws EntityAlreadyExistingException {
+        if (locationRepository.getLocationByLatitudeAndLongitude(location.getLatitude(), location.getLongitude()).isPresent()) {
+            throw new EntityAlreadyExistingException("Location " + location.getName() + " does already exist.");
+        }
+    }
+
     public List<Location> getAllLocations() {
         return locationRepository.findAll();
     }
@@ -62,7 +68,7 @@ public class LocationService {
     }
 
     public Optional<Location> getLocationByName(final String name) {
-        return locationRepository.getLocationByName(name);
+        return locationRepository.findByNameContaining(name).stream().findAny();
     }
 
     private void storeLocationData(final Location location)
@@ -91,13 +97,5 @@ public class LocationService {
         }
 
         location.setIcao(jsonNode.path("station").path("icao").asText());
-    }
-
-    private void assertLocationDoesNotExist(final Location location) throws EntityAlreadyExistingException {
-        if (locationRepository
-                .getLocationByLatitudeAndLongitude(location.getLatitude(), location.getLongitude()).isPresent()) {
-            throw new EntityAlreadyExistingException(
-                    String.format("Location %s does already exist.", location.getName()));
-        }
     }
 }

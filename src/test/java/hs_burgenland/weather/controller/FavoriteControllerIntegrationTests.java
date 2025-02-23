@@ -111,7 +111,7 @@ class FavoriteControllerIntegrationTests {
                         .contentType("application/json")
                         .content("{\"location\":{\"name\":\"Graz\"},\"user\":{\"id\": 1},\"name\":\"Home\"}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Location Graz,Austria does already exist."));
+                .andExpect(content().string("Favorite with locationname Graz,Austria and userId 1 already exists."));
     }
 
     @Test
