@@ -8,8 +8,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"userId", "locationId"}),
-        @UniqueConstraint(columnNames = {"userId", "name"})
+        @UniqueConstraint(columnNames = {"user_id", "location_id"}),
+        @UniqueConstraint(columnNames = {"user_id", "name"})
 })
 public class Favorite {
     @Id
