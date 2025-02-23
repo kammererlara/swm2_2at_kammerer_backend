@@ -2,27 +2,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: weather-backend
+  name: {{ .Values.global.name }}
   labels:
-    app.kubernetes.io/name: weather-backend
-    app.kubernetes.io/component: weather-backend
+    app.kubernetes.io/name: {{ .Values.global.name }}
+    app.kubernetes.io/component: {{ .Values.global.name }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: weather-backend
-      app.kubernetes.io/component: weather-backend
+      app.kubernetes.io/name: {{ .Values.global.name }}
+      app.kubernetes.io/component: {{ .Values.global.name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: weather-backend
-        app.kubernetes.io/component: weather-backend
+        app.kubernetes.io/name: {{ .Values.global.name }}
+        app.kubernetes.io/component: {{ .Values.global.name }}
     spec:
       containers:
-        - name: weather-backend
-          image: ghcr.io/kammererlara/swm2_2at_kammerer_backend:latest
+        - name: {{ .Values.global.name }}
+          image: "{{ .Values.global.image }}:{{ .Values.image.tag }}"
           ports:
-            - containerPort: 8080
+            - containerPort: {{ .Values.global.port }}
               name: http
           envFrom:
             - secretRef:
