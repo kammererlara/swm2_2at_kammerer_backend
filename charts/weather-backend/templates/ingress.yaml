@@ -2,10 +2,10 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: weather-backend
+  name: {{ .Values.global.name }}
   labels:
-    app.kubernetes.io/name: weather-backend
-    app.kubernetes.io/component: weather-backend
+    app.kubernetes.io/name: {{ .Values.global.name }}
+    app.kubernetes.io/component: {{ .Values.global.name }}
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/rewrite-target: "/"
@@ -18,13 +18,13 @@ metadata:
     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
 spec:
   rules:
-    - host: weather-backend.swm2-2at-kammerer.local.xyz
+    - host: {{ .Values.global.host }}
       http:
         paths:
           - path: "/"
             pathType: Prefix
             backend:
               service:
-                name: weather-backend
+                name: {{ .Values.global.name }}
                 port:
-                  number: 8080
+                  number: {{ .Values.service.port }}
