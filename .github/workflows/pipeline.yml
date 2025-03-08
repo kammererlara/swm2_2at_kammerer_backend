@@ -11,6 +11,19 @@ permissions:
   contents: read
 
 jobs:
+  conform:
+    runs-on: ubuntu-latest
+    name: Conform
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
+
+      - uses: siderolabs/conform@v0.1.0-alpha.27
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
   check-pmd:
     runs-on: ubuntu-latest
     name: Check PMD
@@ -55,6 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Unit Tests
     needs:
+      - conform
       - check-pmd
       - check-checkstyle
     strategy:
